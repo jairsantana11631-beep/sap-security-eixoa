@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SAP Security Eixo SaaS</title>
+<style>
+body{margin:0;font-family:Arial,sans-serif;background:#07111f;color:#eef6ff}button,input,textarea,select{font:inherit}
+.app{display:flex;min-height:100vh}.side{width:220px;background:#06101c;padding:16px;position:fixed;inset:0 auto 0 0;overflow-y:auto}.main{margin-left:252px;width:calc(100% - 252px);padding:24px}.menu-group{margin:8px 0;border:1px solid #18314b;border-radius:10px;overflow:hidden}.menu-head{width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#0a1727;color:#eef6ff;border:0;cursor:pointer;font-weight:800;text-align:left}.menu-head:hover{background:#10243a}.menu-items{display:none;padding:5px}.menu-group.open .menu-items{display:block}.menu-arrow{font-size:12px;opacity:.8;transition:.2s}.menu-group.open .menu-arrow{transform:rotate(90deg)}.nav .menu-items button{margin:3px 0;padding:9px 10px;background:#0d1b2d;font-size:14px}.nav .menu-items button:hover{background:#15304d}.quickmenu{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}.quickmenu button{padding:8px 11px}
+.brand{font-size:22px;font-weight:800;margin-bottom:20px}.brand span{color:#35a7ff}.nav button{display:block;width:100%;text-align:left;margin:5px 0;padding:11px;border:0;border-radius:8px;background:#0d1b2d;color:#b8caDC;cursor:pointer}.nav button:hover{background:#15304d}.card{background:#0d1b2d;border:1px solid #1d3550;border-radius:10px;padding:18px;margin-bottom:16px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.btn{background:#35a7ff;border:0;border-radius:7px;padding:10px 14px;font-weight:700;cursor:pointer}.secondary{background:#15304d;color:#fff}.muted{color:#91a6bb}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:11px;border-bottom:1px solid #1d3550;text-align:left}.login{min-height:100vh;display:grid;place-items:center}.loginbox{width:400px;background:#0d1b2d;padding:28px;border:1px solid #1d3550;border-radius:12px}.loginbox input{width:100%;padding:10px;margin:8px 0 14px;background:#071727;color:#fff;border:1px solid #1d3550;border-radius:7px;box-sizing:border-box}.tag{padding:4px 7px;border-radius:14px;border:1px solid #35506d;font-size:12px}.notice{padding:12px;border:1px solid #31506c;background:#0a1b2c;border-radius:8px}.toast{position:fixed;right:20px;bottom:20px;background:#15304d;padding:12px 15px;border-radius:8px}
+@media(max-width:900px){.grid{grid-template-columns:1fr 1fr}}@media(max-width:650px){.side{position:static;width:auto;padding:12px}.main{margin:0;width:auto;padding:16px}.app{display:block}.grid{grid-template-columns:1fr}.brand{margin-bottom:10px}.menu-group{margin:5px 0}.menu-head{padding:9px 10px}}
+
+.modalback{position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px}.modal{width:min(900px,95vw);max-height:88vh;overflow:auto;background:#0d1b2d;border:1px solid #31557a;border-radius:14px;padding:22px}.modal h2{margin-top:0}.close{float:right;background:#15304d;color:#fff;border:0;border-radius:8px;padding:8px 12px;cursor:pointer}.lesson{padding:12px;border:1px solid #1d3550;border-radius:10px;margin:10px 0;background:#0a1727}.field{margin:10px 0}.field label{display:block;margin-bottom:6px;color:#b8cadc;font-weight:700}.field input,.field textarea,.field select{width:100%;box-sizing:border-box;background:#071727;color:#fff;border:1px solid #31506c;border-radius:8px;padding:10px}.field textarea{min-height:180px;resize:vertical}.actions{display:flex;gap:8px;flex-wrap:wrap}.article-card h3{margin-bottom:6px}.article-meta{font-size:12px;color:#91a6bb;margin-bottom:10px}.creator{font-size:12px;color:#8fa9c3;margin-top:6px;letter-spacing:.2px}.creator strong{color:#fff}.ticket-title-btn{background:none;border:0;color:#dcecff;padding:0;cursor:pointer;text-align:left;font:inherit;font-weight:700}.ticket-title-btn:hover{text-decoration:underline;color:#64b5ff}.ticket-status{display:inline-block;padding:5px 9px;border-radius:999px;background:#122a42;border:1px solid #31557a;font-size:12px}
+
+.publicbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 18px}.purpose{border-left:4px solid #35a7ff;padding-left:14px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.formgrid .full{grid-column:1/-1}.formgrid input,.formgrid textarea,.formgrid select{width:100%;box-sizing:border-box;background:#071727;color:#fff;border:1px solid #31506c;border-radius:8px;padding:10px}.formgrid textarea{min-height:120px}.hero{padding:22px;background:linear-gradient(135deg,#0d1b2d,#0b2742);border:1px solid #31557a;border-radius:14px;margin-bottom:18px}@media(max-width:650px){.formgrid{grid-template-columns:1fr}}
+
+/* V6 — Home premium + mobile first */
+:root{--bg:#07111f;--panel:#0d1b2d;--panel2:#0a1727;--line:#1d3550;--blue:#35a7ff;--text:#eef6ff;--muted:#91a6bb}
+body{background:radial-gradient(circle at 85% 0%,rgba(53,167,255,.13),transparent 32%),var(--bg)}
+.topbar{display:none}.mobile-overlay{display:none}
+.home-hero{position:relative;overflow:hidden;border:1px solid #31557a;border-radius:24px;padding:clamp(28px,5vw,64px);margin-bottom:22px;background:linear-gradient(135deg,#0b1d31 0%,#0b2742 55%,#0b1b2c 100%);box-shadow:0 22px 70px rgba(0,0,0,.25)}
+.home-hero:before{content:"";position:absolute;width:430px;height:430px;border-radius:50%;right:-170px;top:-220px;background:radial-gradient(circle,rgba(53,167,255,.30),rgba(53,167,255,0) 68%)}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border:1px solid rgba(53,167,255,.35);background:rgba(53,167,255,.08);border-radius:999px;color:#bfe4ff;font-weight:800;font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+.hero-title{font-size:clamp(36px,6vw,72px);line-height:.98;letter-spacing:-.045em;max-width:850px;margin:20px 0 18px}.hero-title span{color:var(--blue)}
+.hero-copy{font-size:clamp(16px,2vw,20px);line-height:1.6;max-width:780px;color:#c8d8e8;margin:0 0 26px}
+.hero-actions{display:flex;gap:10px;flex-wrap:wrap}.hero-actions .btn{padding:13px 18px;border-radius:10px}.btn-outline{background:transparent;color:#eaf6ff;border:1px solid #41617f}
+.hero-trust{display:flex;gap:16px;flex-wrap:wrap;margin-top:28px;color:#a9bed0;font-size:13px}.hero-trust span{display:flex;align-items:center;gap:7px}
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin:28px 0 14px}.section-head h2{margin:0;font-size:26px}.section-head p{margin:5px 0 0;color:var(--muted)}
+.home-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.home-card{position:relative;min-height:178px;background:linear-gradient(180deg,#0f2034,#0b1828);border:1px solid #1f3c59;border-radius:18px;padding:20px;cursor:pointer;transition:.18s transform,.18s border-color,.18s box-shadow}.home-card:hover{transform:translateY(-3px);border-color:#3b78a8;box-shadow:0 14px 34px rgba(0,0,0,.2)}
+.home-card .icon{width:42px;height:42px;display:grid;place-items:center;border-radius:12px;background:rgba(53,167,255,.11);border:1px solid rgba(53,167,255,.22);font-size:21px;margin-bottom:20px}.home-card h3{margin:0 0 8px}.home-card p{margin:0;color:#9fb4c7;line-height:1.45;font-size:14px}.home-card .link{position:absolute;bottom:18px;color:#7fc7ff;font-weight:800;font-size:13px}
+.value-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0}.value{background:rgba(13,27,45,.72);border:1px solid #1d3550;border-radius:15px;padding:16px}.value b{display:block;font-size:18px;margin-bottom:5px}.value span{color:#91a6bb;font-size:13px}
+.mobile-quick{display:none}
+@media(max-width:1100px){.home-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){
+ body{padding-top:64px}.app{display:block}.side{position:fixed;left:0;top:0;bottom:0;width:min(84vw,320px);z-index:1002;transform:translateX(-105%);transition:transform .22s ease;padding:18px;box-shadow:20px 0 55px rgba(0,0,0,.45)}.side.mobile-open{transform:translateX(0)}
+ .main{margin:0;width:auto;padding:14px 14px 92px}.topbar{display:flex;position:fixed;top:0;left:0;right:0;height:64px;z-index:1000;align-items:center;justify-content:space-between;padding:0 14px;background:rgba(6,16,28,.94);backdrop-filter:blur(12px);border-bottom:1px solid #18314b;box-sizing:border-box}.topbar-brand{font-weight:900;font-size:17px}.topbar-brand span{color:var(--blue)}.burger{width:42px;height:42px;border:1px solid #25445f;background:#0d1b2d;color:white;border-radius:11px;font-size:21px}.mobile-overlay.show{display:block;position:fixed;inset:0;background:rgba(0,0,0,.58);z-index:1001}
+ .home-hero{padding:26px 20px;border-radius:18px;margin-top:2px}.hero-title{font-size:40px;max-width:100%;margin-top:16px}.hero-copy{font-size:16px}.hero-actions{display:grid;grid-template-columns:1fr}.hero-actions .btn{width:100%;min-height:48px}.hero-trust{display:grid;grid-template-columns:1fr;gap:8px}
+ .home-grid{grid-template-columns:1fr;gap:10px}.home-card{min-height:142px;padding:17px}.home-card .icon{margin-bottom:13px}.section-head{align-items:flex-start;margin-top:22px}.section-head h2{font-size:22px}.value-strip{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.table{display:block;overflow-x:auto;white-space:nowrap}.card{padding:15px}.modalback{padding:10px}.modal{padding:17px;max-height:92vh}.formgrid{grid-template-columns:1fr}.loginbox{width:auto;max-width:100%;margin:12px}
+ .mobile-quick{display:grid;position:fixed;left:8px;right:8px;bottom:8px;z-index:999;grid-template-columns:repeat(5,1fr);background:rgba(6,16,28,.96);border:1px solid #24435f;border-radius:15px;padding:7px;box-shadow:0 12px 35px rgba(0,0,0,.35);backdrop-filter:blur(12px)}.mobile-quick button{border:0;background:transparent;color:#b8cadc;padding:7px 2px;font-size:10px;border-radius:9px}.mobile-quick button b{display:block;color:white;font-size:18px;margin-bottom:2px}
+}
+
+
+.docs-head{display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap}.docs-list{display:grid;gap:10px;margin-top:12px}.doc-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.02)}.doc-info{min-width:0}.doc-info b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.doc-meta{font-size:12px;color:var(--muted);margin-top:3px}.doc-actions{display:flex;gap:8px;flex-wrap:wrap}.upload-box{margin-top:14px;padding:14px;border:1px dashed #3d5577;border-radius:14px;background:rgba(25,181,254,.04)}.upload-grid{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end}.mini-note{font-size:12px;color:var(--muted);margin-top:8px}@media(max-width:760px){.doc-row{align-items:flex-start;flex-direction:column}.doc-actions{width:100%}.doc-actions .btn{flex:1}.upload-grid{grid-template-columns:1fr}.docs-head{align-items:flex-start}}
+
+/* V7 — Monitoramento & Vulnerability Intelligence */
+.monitor-hero{background:linear-gradient(135deg,#0a1a2b,#0b3152);border:1px solid #2d5f86;border-radius:20px;padding:22px;margin-bottom:16px}.monitor-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}.kpi{background:#0b1929;border:1px solid #21415e;border-radius:15px;padding:16px}.kpi .num{font-size:30px;font-weight:900;margin:7px 0}.kpi small{color:#91a6bb}.critical{color:#ff6b6b}.high{color:#ffb454}.ok{color:#54d49b}.monitor-grid{display:grid;grid-template-columns:2fr 1fr;gap:14px}.chartbox{background:#0b1929;border:1px solid #21415e;border-radius:15px;padding:16px}.bars{display:flex;align-items:flex-end;gap:10px;height:190px;padding-top:12px}.barcol{flex:1;text-align:center;color:#91a6bb;font-size:11px}.barv{background:linear-gradient(180deg,#55b9ff,#2377ba);border-radius:7px 7px 2px 2px;min-height:6px;margin-bottom:7px;transition:.3s}.donut{width:150px;height:150px;border-radius:50%;margin:12px auto;background:conic-gradient(#ff6565 0 22%,#ffb454 22% 48%,#35a7ff 48% 78%,#54d49b 78% 100%);display:grid;place-items:center}.donut:after{content:'Risco';width:88px;height:88px;border-radius:50%;background:#0b1929;display:grid;place-items:center;font-weight:900}.live-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#54d49b;box-shadow:0 0 0 5px rgba(84,212,155,.12);margin-right:8px}.event{padding:11px 0;border-bottom:1px solid #1d3550}.event:last-child{border-bottom:0}.event b{display:block;margin-bottom:3px}.riskmeter{height:10px;background:#07111f;border-radius:999px;overflow:hidden}.riskmeter span{display:block;height:100%;background:linear-gradient(90deg,#35a7ff,#ffb454,#ff6565)}@media(max-width:1100px){.monitor-kpis{grid-template-columns:repeat(2,1fr)}.monitor-grid{grid-template-columns:1fr}}@media(max-width:650px){.monitor-kpis{grid-template-columns:1fr}.bars{height:150px}}
+</style></head>
+<body>
+<form name="support-ticket" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="form-name" value="support-ticket"><input name="bot-field"><input name="name"><input name="email"><input name="company"><input name="area"><input name="priority"><input name="subject"><textarea name="description"></textarea></form>
+<form name="cve-alerts" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="form-name" value="cve-alerts"><input name="bot-field"><input name="name"><input name="email"><input name="company"><input name="systems"><input name="severity"></form>
+<div id="app"></div>
+<script>
+const API=(location.protocol==="file:"?"http://localhost:8080":location.origin);
+let session=JSON.parse(sessionStorage.getItem("ssh_session")||"null");
+const guest={token:null,id:"GUEST",email:"visitante",name:"Visitante",role:"GUEST",tenant_id:"public",tenant_name:"Acesso Publico"};
+const LOCAL_KEY="ssh_navigable_data";
+let localDB=JSON.parse(localStorage.getItem(LOCAL_KEY)||"null")||{
+ vulnerabilities:[
+  {id:"VUL-001",external_id:"VUL-001",title:"Privilégio excessivo em role FI",system_name:"S/4HANA",severity:"CRITICAL",status:"OPEN"},
+  {id:"VUL-002",external_id:"VUL-002",title:"Conflito SoD em aprovação financeira",system_name:"GRC",severity:"HIGH",status:"IN_PROGRESS"},
+  {id:"VUL-003",external_id:"VUL-003",title:"Role Collection BTP superprivilegiada",system_name:"BTP",severity:"HIGH",status:"OPEN"}
+ ],
+ users:[
+  {name:"Security Admin",email:"admin@demo.local",role:"TENANT_ADMIN",status:"ACTIVE"},
+  {name:"GRC Analyst",email:"grc@demo.local",role:"GRC_ANALYST",status:"ACTIVE"},
+  {name:"Auditor",email:"audit@demo.local",role:"AUDITOR",status:"ACTIVE"}
+ ],
+ integrations:[
+  {kind:"SAP",status:"READY_FOR_CONFIGURATION"},
+  {kind:"GRC",status:"READY_FOR_CONFIGURATION"},
+  {kind:"BTP",status:"READY_FOR_CONFIGURATION"},
+  {kind:"IAS",status:"READY_FOR_CONFIGURATION"}
+ ],
+ grcRisks:[
+  {id:"GRC-001",risk:"Pagamento + Aprovação de pagamento",area:"FI",level:"Crítico",status:"Aberto"},
+  {id:"GRC-002",risk:"Criar fornecedor + Pagamento",area:"FI/MM",level:"Alto",status:"Mitigado"},
+  {id:"GRC-003",risk:"Criar pedido + Recebimento",area:"MM",level:"Médio",status:"Em revisão"}
+ ],
+ btpAssets:[
+  {name:"Security Subaccount",type:"Subaccount",risk:"Baixo",status:"Monitorado"},
+  {name:"Integration Suite",type:"Service",risk:"Médio",status:"Monitorado"},
+  {name:"Cloud Connector",type:"Connectivity",risk:"Alto",status:"Ação necessária"}
+ ],
+ tickets:[
+  {id:"INC-1001",title:"Acesso indevido identificado",priority:"Alta",status:"Aberto",area:"SAP Security"},
+  {id:"INC-1002",title:"Conflito SoD financeiro",priority:"Alta",status:"Em andamento",area:"GRC"},
+  {id:"INC-1003",title:"Falha de integração BTP",priority:"Média",status:"Resolvido",area:"BTP"}
+ ],
+ controls:[
+  {framework:"SOX",control:"Segregação de Funções e controles sobre acessos financeiros",status:"Conforme"},
+  {framework:"ISO 27001",control:"Gestão de identidade, acesso, logs e evidências",status:"Conforme"},
+  {framework:"NIST CSF 2.0",control:"Govern, Identify, Protect, Detect, Respond e Recover",status:"Em revisão"},
+  {framework:"LGPD",control:"Acesso a dados pessoais, rastreabilidade e minimização",status:"Conforme"},
+  {framework:"COBIT 2019",control:"Governança, objetivos de controle, responsabilidades e métricas",status:"Em revisão"},
+  {framework:"CIS Controls v8.1",control:"Controles priorizados de segurança, contas e privilégios",status:"Planejado"},
+  {framework:"PCI DSS 4.0.1",control:"Acesso a dados de cartão, autenticação, logging e monitoramento",status:"Planejado"},
+  {framework:"ISO 27701",control:"Privacidade e gestão de informações pessoais",status:"Em revisão"},
+  {framework:"ISO 22301",control:"Continuidade de negócios e resiliência operacional",status:"Planejado"}
+ ],
+ courses:[
+  {name:"SAP Security 2026",progress:62},
+  {name:"SAP GRC Access Control",progress:38},
+  {name:"SAP BTP Security",progress:21},
+  {name:"SAP Security + IA/Joule",progress:8}
+ ],
+ plans:[
+  {name:"Starter",price:"R$ 990/mês",users:5,modules:"Security + Vulnerabilidades"},
+  {name:"Professional",price:"R$ 2.490/mês",users:25,modules:"Security + GRC + BTP + Compliance"},
+  {name:"Enterprise",price:"Sob consulta",users:"Ilimitado",modules:"Todos + SSO + API + SLA"}
+ ],
+ contents:[
+  {id:"CNT-001",type:"Artigo",category:"SAP Security",title:"Menor privilégio no SAP: por onde começar",summary:"Princípios práticos para revisar roles, acessos críticos e evidências.",body:"Um programa sólido de SAP Security começa pela revisão de roles, usuários privilegiados e autorizações críticas. Use PFCG, SU24, SU53 e traces como base técnica e registre decisões para auditoria.",status:"PUBLISHED",author:"Security Admin",created_at:new Date().toISOString()},
+  {id:"CNT-002",type:"Material",category:"SAP GRC",title:"Checklist de revisão de conflitos SoD",summary:"Guia rápido para análise, mitigação e evidência de riscos SoD.",body:"Revise o Rule Set, valide funções conflitantes, identifique usuário e role, avalie o impacto, registre a decisão e acompanhe controles mitigadores com periodicidade definida.",status:"PUBLISHED",author:"Security Admin",created_at:new Date().toISOString()}
+ ],
+ audit:[{created_at:new Date().toLocaleString("pt-BR"),action:"demo.started",resource_type:"session",user_email:"admin@demo.local"}]
+};
+if(!Array.isArray(localDB.contents)) localDB.contents=[];
+if(!Array.isArray(localDB.evidences)) localDB.evidences=[];
+function localSave(){localStorage.setItem(LOCAL_KEY,JSON.stringify(localDB))}
+
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function $(id){return document.getElementById(id)}
+function toast(t){let e=document.createElement("div");e.className="toast";e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),2200)}
+async function api(path,opt={}){
+ try{
+  opt.headers={...(opt.headers||{}),"Content-Type":"application/json"};
+  if(session?.token)opt.headers.Authorization="Bearer "+session.token;
+  let r=await fetch(API+path,opt); let j=await r.json().catch(()=>({}));
+  if(!r.ok)throw Error(j.error||"Erro API"); return j;
+ }catch(e){
+  if(path==="/api/health") return {ok:true,db:"DEMO LOCAL"};
+  if(path==="/api/vulnerabilities" && (!opt.method||opt.method==="GET")) return localDB.vulnerabilities;
+  if(path==="/api/vulnerabilities" && opt.method==="POST"){
+    let b=JSON.parse(opt.body||"{}"), id="VUL-"+String(localDB.vulnerabilities.length+1).padStart(3,"0");
+    let v={id,external_id:id,title:b.title,system_name:b.system_name,severity:b.severity,status:"OPEN"};
+    localDB.vulnerabilities.unshift(v); localDB.audit.unshift({created_at:new Date().toLocaleString("pt-BR"),action:"vulnerability.create",resource_type:"vulnerability",user_email:session?.email}); localSave(); return v;
+  }
+  if(path==="/api/users") return localDB.users;
+  if(path==="/api/grc/risks") return localDB.grcRisks;
+  if(path==="/api/btp/assets") return localDB.btpAssets;
+  if(path==="/api/tickets") return localDB.tickets;
+  if(path==="/api/compliance/controls") return localDB.controls;
+  if(path==="/api/billing/plans") return localDB.plans;
+  if(path==="/api/integrations") return localDB.integrations;
+  if(path==="/api/audit") return localDB.audit;
+  if(path.includes("/api/integrations/")&&path.endsWith("/test")) return {status:"DEMO",message:"Conector navegável. A integração real será ativada com endpoint e credenciais do cliente."};
+  throw e;
+ }
+}
+function go(x){
+ const target=String(x||"dashboard");
+ if(route()===target){ render(); return; }
+ location.hash="/"+target;
+}
+function route(){return location.hash.replace(/^#\/?/,"")||"dashboard"}
+function shell(){
+ const admin=session?.role!=="GUEST";
+ return `<div class="topbar"><button class="burger" onclick="toggleMobileMenu()" aria-label="Abrir menu">☰</button><div class="topbar-brand">SAP <span>Security Eixo</span></div><button class="burger" onclick="go('tickets')" aria-label="Suporte">?</button></div><div id="mobileOverlay" class="mobile-overlay" onclick="toggleMobileMenu(false)"></div><div class="app"><aside class="side" id="sideMenu"><div class="brand">SAP <span>Security Eixo</span><div class="creator">Idealizador: <strong>Jair Santana</strong></div></div><div class="nav">
+ <div class="menu-group open"><button class="menu-head" onclick="toggleMenu(this)"><span>Visão Geral</span><span class="menu-arrow">▶</span></button><div class="menu-items"><button onclick="goMobile('dashboard')">Dashboard</button><button onclick="goMobile('monitoring')">📡 Monitoramento</button></div></div>
+ <div class="menu-group open"><button class="menu-head" onclick="toggleMenu(this)"><span>Segurança SAP</span><span class="menu-arrow">▶</span></button><div class="menu-items"><button onclick="goMobile('security')">SAP Security</button><button onclick="goMobile('grc')">SAP GRC</button><button onclick="goMobile('btp')">SAP BTP</button><button onclick="goMobile('governance')">SAP Governança</button><button onclick="goMobile('ai')">IA / Joule</button><button onclick="goMobile('vulnerabilities')">Vulnerabilidades</button><button onclick="goMobile('compliance')">Compliance</button></div></div>
+ <div class="menu-group"><button class="menu-head" onclick="toggleMenu(this)"><span>Conteúdo & Suporte</span><span class="menu-arrow">▶</span></button><div class="menu-items"><button onclick="goMobile('tickets')">Suporte / Tickets</button><button onclick="goMobile('academy')">Academy</button><button onclick="goMobile('articles')">Artigos & Materiais</button></div></div>
+ ${admin?`<div class="menu-group"><button class="menu-head" onclick="toggleMenu(this)"><span>Administração</span><span class="menu-arrow">▶</span></button><div class="menu-items"><button onclick="goMobile('contentAdmin')">Painel de Conteúdo</button><button onclick="goMobile('cveAdmin')">Alertas CVE</button><button onclick="goMobile('users')">Usuários / RBAC</button><button onclick="goMobile('integrations')">Integrações</button><button onclick="goMobile('audit')">Auditoria</button><button onclick="goMobile('billing')">Planos / Billing</button><button onclick="goMobile('settings')">Configurações</button></div></div>`:''}
+ </div><p class="muted">Perfil: ${session?.role==="GUEST"?"Visitante":esc(session.tenant_name)}</p>${session?.role==="GUEST"?`<button class="btn" onclick="showLogin()">Área Administrativa</button>`:`<button class="btn secondary" onclick="logout()">Sair</button>`}</aside><main class="main"><div id="view"></div></main></div><nav class="mobile-quick" aria-label="Atalhos"><button onclick="go('dashboard')"><b>⌂</b>Início</button><button onclick="go('monitoring')"><b>◉</b>Monitor</button><button onclick="go('grc')"><b>◈</b>GRC</button><button onclick="go('vulnerabilities')"><b>⚠</b>CVEs</button><button onclick="go('tickets')"><b>✦</b>Suporte</button></nav>`}
+function toggleMobileMenu(force){let side=document.getElementById('sideMenu'),ov=document.getElementById('mobileOverlay');if(!side)return;let open=force===undefined?!side.classList.contains('mobile-open'):force;side.classList.toggle('mobile-open',open);ov?.classList.toggle('show',open)}
+function goMobile(x){go(x);toggleMobileMenu(false)}
+function toggleMenu(btn){btn.closest('.menu-group')?.classList.toggle('open')}
+function loginPage(){return `<div class="login"><div class="loginbox"><div class="brand">SAP <span>Security Eixo</span></div><h2>Acesso SaaS</h2><p class="muted">Demo navegável — funciona diretamente no navegador:</p><label>E-mail</label><input id="email" value="admin@demo.local"><label>Senha</label><input id="pass" type="password" value="Admin@123"><button class="btn" style="width:100%" onclick="login()">Entrar no SAP Security Hub</button><button class="btn secondary" style="width:100%;margin-top:8px" onclick="location.href=API+'/auth/login?redirect=/'">Entrar com SSO / MFA</button><p class="muted">Modo: produção/API quando hospedado; demonstração local ao abrir o HTML</p></div></div>`}
+async function login(){
+ const emailEl=$("email"), passEl=$("pass");
+ const emailValue=(emailEl?.value||"admin@demo.local").trim();
+ const passwordValue=passEl?.value||"Admin@123";
+ try{
+  let r=await api("/api/auth/login",{method:"POST",body:JSON.stringify({email:emailValue,password:passwordValue})});
+  session={token:r.access_token,...r.user};
+ }catch(e){
+  if(emailValue!=="admin@demo.local" || passwordValue!=="Admin@123"){
+   toast("Credenciais inválidas");
+   return;
+  }
+  session={token:"demo-local",id:"USR-001",email:emailValue,name:"Security Admin",role:"TENANT_ADMIN",tenant_id:"tenant-demo",tenant_name:"Demo Corporation"};
+ }
+ sessionStorage.setItem("ssh_session",JSON.stringify(session));
+ $("loginModal")?.remove();
+ go("contentAdmin");
+ render();
+ toast("Área Administrativa liberada");
+}
+function logout(){sessionStorage.removeItem("ssh_session");session=null;render()}
+function showLogin(){let e=document.createElement("div");e.className="modalback";e.id="loginModal";e.innerHTML=`<div class="modal" style="max-width:460px"><button class="close" onclick="document.getElementById('loginModal').remove()">Fechar</button><h2>Área Administrativa</h2><p class="muted">A autenticação é necessária somente para administração e publicação.</p><div class="field"><label>E-mail</label><input id="email" value="admin@demo.local"></div><div class="field"><label>Senha</label><input id="pass" type="password" value="Admin@123"></div><button class="btn" style="width:100%" onclick="login()">Entrar</button></div>`;document.body.appendChild(e)}
+
+function riskPriorityLabel(s){return s>=90?'P1 — CRÍTICO':s>=75?'P2 — ALTO':s>=50?'P3 — MODERADO':'P4 — BAIXO'}
+function riskCommandCenter(){
+ let vs=localDB.vulnerabilities||[], gr=localDB.grcRisks||localDB.risks||[];
+ let c=vs.filter(v=>String(v.severity||'').toUpperCase()==='CRITICAL').length;
+ let a=vs.filter(v=>String(v.severity||'').toUpperCase()==='HIGH').length;
+ let s=gr.filter(r=>String(r.status||'OPEN').toUpperCase()!=='RESOLVED').length;
+ let score=Math.min(100,45+c*12+a*5+s*3),p=riskPriorityLabel(score);
+ return `<div class="card" style="margin-top:16px"><div class="docs-head"><div><h2>🎯 Identificação e Priorização de Riscos</h2><p class="muted">Vulnerabilidades, exposição, GRC/SoD e remediação em uma única visão.</p></div><div style="font-size:24px;font-weight:900">${score}/100<br><small>${p}</small></div></div><div class="grid"><div class="card"><h3>🔴 ${c}</h3><p>Críticas</p></div><div class="card"><h3>🟠 ${a}</h3><p>Altas</p></div><div class="card"><h3>⚠️ ${s}</h3><p>GRC/SoD</p></div><div class="card"><h3>🛡️ ${p}</h3><p>Prioridade</p></div></div><div class="actions"><button class="btn" onclick="openRiskIdentification()">🎯 Identificar Risco</button><button class="btn secondary" onclick="openExposureAnalysis()">🔎 Analisar Exposição</button><button class="btn secondary" onclick="openRiskPrioritization()">📊 Priorizar Risco</button><button class="btn secondary" onclick="openRemediationPlan()">🛡️ Plano de Remediação</button></div></div>`;
+}
+function riskModal(t,b){let o=document.getElementById('detailModal');if(o)o.remove();let e=document.createElement('div');e.className='modalback';e.id='detailModal';e.innerHTML=`<div class="modal"><button class="close" onclick="closeDetail()">Fechar</button><h2>${t}</h2>${b}</div>`;document.body.appendChild(e)}
+function openRiskIdentification(){let vs=(localDB.vulnerabilities||[]);let rows=vs.length?vs.slice(0,15).map(v=>`<tr><td>${esc(v.external_id||v.cve||'—')}</td><td>${esc(v.system_name||'SAP')}</td><td>${esc(v.severity||'—')}</td><td>${esc(v.status||'OPEN')}</td></tr>`).join(''):'<tr><td colspan="4">Nenhuma vulnerabilidade cadastrada.</td></tr>';riskModal('🎯 Identificação de Riscos',`<table><thead><tr><th>CVE</th><th>Sistema</th><th>Severidade</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table><div class="actions"><button class="btn" onclick="go('vulnerabilities');closeDetail()">Abrir Vulnerability Intelligence Center</button></div>`)}
+function openExposureAnalysis(){riskModal('🔎 Análise de Exposição','<div class="lesson"><ol><li>Confirmar componente instalado.</li><li>Validar versão vulnerável.</li><li>Verificar exposição externa.</li><li>Revisar autenticação, segmentação e controles compensatórios.</li><li>Pesquisar sinais de exploração nos logs.</li><li>Correlacionar o CVE com NVD e CISA KEV.</li></ol></div>')}
+function openRiskPrioritization(){let vs=localDB.vulnerabilities||[],c=vs.filter(v=>String(v.severity||'').toUpperCase()==='CRITICAL').length,a=vs.filter(v=>String(v.severity||'').toUpperCase()==='HIGH').length,score=Math.min(100,45+c*12+a*5);riskModal('📊 Priorização de Risco',`<div class="card"><h2>SAP Risk Priority Score™: ${score}/100</h2><p><b>${riskPriorityLabel(score)}</b></p></div><p>Priorize por severidade, exploração conhecida, exposição, criticidade do negócio e controles compensatórios.</p>`)}
+function openRemediationPlan(){riskModal('🛡️ Plano de Remediação','<div class="lesson"><ol><li><b>Identificar:</b> CVE, sistema, componente e versão.</li><li><b>Validar exposição.</b></li><li><b>Priorizar:</b> CVSS, KEV e impacto.</li><li><b>Remediar:</b> SAP Security Note, patch ou mitigação suportada.</li><li><b>Testar</b> antes da produção.</li><li><b>Evidenciar</b> a correção.</li><li><b>Reavaliar e encerrar</b> o risco.</li></ol></div>')}
+
+async function dashboard(){let h={ok:true,db:"PLATAFORMA"},v=localDB.vulnerabilities||[];try{h=await api("/api/health");v=await api("/api/vulnerabilities")}catch(e){}return `<section class="home-hero"><span class="eyebrow">● Segurança SAP • Governança • Conhecimento</span><div class="creator" style="margin:8px 0 2px">Projeto idealizado por <strong>Jair Santana</strong></div><h1 class="hero-title">Segurança SAP com <span>visão, controle e ação.</span></h1><p class="hero-copy">Um portal único para entender riscos, governar acessos, acompanhar vulnerabilidades, consultar SAP GRC e BTP, aprender e pedir suporte — de forma simples e prática.</p><div class="hero-actions"><button class="btn" onclick="go('security')">Explorar Segurança SAP</button><button class="btn btn-outline" onclick="go('grc')">Consultar SAP GRC</button><button class="btn btn-outline" onclick="go('tickets')">Abrir chamado</button></div><div class="hero-trust"><span>✓ Acesso público ao conhecimento</span><span>✓ Administração protegida</span><span>✓ Conteúdo organizado por módulo</span></div></section>
+<div class="section-head"><div><h2>O que você precisa fazer hoje?</h2><p>Acesse direto a área certa sem procurar em menus longos.</p></div></div>
+<div class="home-grid"><article class="home-card" onclick="go('monitoring')"><div class="icon">📡</div><h3>Monitoramento</h3><p>Risk Score, eventos, vulnerabilidades e GRC/SoD em uma visão operacional inteligente.</p><span class="link">Abrir Command Center →</span></article><article class="home-card" onclick="go('security')"><div class="icon">🛡</div><h3>SAP Security</h3><p>Roles, usuários, autorizações, acessos críticos e menor privilégio.</p><span class="link">Abrir módulo →</span></article><article class="home-card" onclick="go('grc')"><div class="icon">◈</div><h3>SAP GRC</h3><p>SoD, ARA, ARM, BRM, EAM, Rule Set, workflows e biblioteca de PDFs.</p><span class="link">Consultar GRC →</span></article><article class="home-card" onclick="go('governance')"><div class="icon">◎</div><h3>SAP Governança</h3><p>Políticas, controles, responsabilidades, recertificação e indicadores.</p><span class="link">Abrir Governança →</span></article><article class="home-card" onclick="go('vulnerabilities')"><div class="icon">⚠</div><h3>Vulnerabilidades & CVEs</h3><p>Acompanhe riscos e cadastre seu e-mail para alertas de CVE.</p><span class="link">Ver vulnerabilidades →</span></article><article class="home-card" onclick="go('tickets')"><div class="icon">✦</div><h3>Suporte especializado</h3><p>Abra um chamado para SAP Security, GRC, BTP, compliance ou integrações.</p><span class="link">Abrir chamado →</span></article></div>
+<div class="value-strip"><div class="value"><b>Conhecimento centralizado</b><span>Artigos, materiais, cursos e guias em um só lugar.</span></div><div class="value"><b>Governança prática</b><span>Segurança, GRC, BTP e compliance conectados.</span></div><div class="value"><b>Suporte orientado</b><span>Chamados e alertas organizados para acelerar a resposta.</span></div></div>
+<div class="section-head"><div><h2>Visão do ambiente</h2><p>Indicadores rápidos da plataforma.</p></div></div><div class="grid"><div class="card"><b>Serviço</b><h2>${h.ok?"ONLINE":"OFF"}</h2></div><div class="card"><b>Base de dados</b><h2>${esc(h.db)}</h2></div><div class="card"><b>Vulnerabilidades</b><h2>${v.length}</h2></div><div class="card"><b>Controle de acesso</b><h2>RBAC</h2></div></div>`
+ let rv=document.getElementById('view');if(rv)rv.insertAdjacentHTML('beforeend',riskCommandCenter());
+}
+async function monitoring(){
+ let vs=[]; try{vs=await api('/api/vulnerabilities')}catch(e){vs=localDB.vulnerabilities||[]}
+ if(!Array.isArray(vs))vs=Array.isArray(vs?.items)?vs.items:(localDB.vulnerabilities||[]);
+ let gr=[]; try{gr=await api('/api/grc/risks')}catch(e){gr=localDB.grcRisks||[]}
+ if(!Array.isArray(gr))gr=Array.isArray(gr?.items)?gr.items:Array.isArray(gr?.risks)?gr.risks:(localDB.grcRisks||[]);
+ const crit=vs.filter(v=>String(v.severity).toUpperCase()==='CRITICAL').length, high=vs.filter(v=>String(v.severity).toUpperCase()==='HIGH').length;
+ const open=vs.filter(v=>!['RESOLVED','CLOSED'].includes(String(v.status).toUpperCase())).length;
+ const sod=gr.filter(r=>!['RESOLVED','MITIGADO'].includes(String(r.status).toUpperCase())).length;
+ const score=Math.min(100,38+crit*14+high*7+sod*5);
+ const trend=[42,51,48,63,58,72,score]; const days=['D-6','D-5','D-4','D-3','D-2','D-1','Agora'];
+ const events=[...vs.slice(0,3).map(v=>({t:v.title,s:v.system_name||'SAP',sev:v.severity})),...gr.slice(0,2).map(r=>({t:r.risk||r.title,s:'GRC / '+(r.area||'SoD'),sev:r.level||'RISK'}))];
+ return `<div class="monitor-hero"><div class="docs-head"><div><span class="eyebrow"><span class="live-dot"></span>Monitoramento inteligente</span><h1 style="margin-bottom:7px">SAP Security Operations & Risk Intelligence</h1><p class="muted">Visão operacional consolidada de vulnerabilidades, GRC/SoD, exposição e sinais de risco. Atualização da tela: ${new Date().toLocaleTimeString('pt-BR')}</p></div><button class="btn" onclick="render();toast('Painel atualizado')">↻ Atualizar agora</button></div></div>
+ <div class="monitor-kpis"><div class="kpi"><small>Risk Score</small><div class="num ${score>=75?'critical':score>=55?'high':'ok'}">${score}/100</div><div class="riskmeter"><span style="width:${score}%"></span></div></div><div class="kpi"><small>Vulnerabilidades abertas</small><div class="num">${open}</div><small>Em acompanhamento</small></div><div class="kpi"><small>Críticas</small><div class="num critical">${crit}</div><small>Prioridade imediata</small></div><div class="kpi"><small>Altas</small><div class="num high">${high}</div><small>Requerem plano de ação</small></div><div class="kpi"><small>Riscos GRC / SoD</small><div class="num">${sod}</div><small>Não encerrados</small></div></div>
+ <div class="monitor-grid" style="margin-top:14px"><div class="chartbox"><div class="docs-head"><div><h3>Tendência do SAP Risk Score</h3><p class="muted">Indicador composto para priorização operacional.</p></div><span class="tag">LIVE</span></div><div class="bars">${trend.map((x,i)=>`<div class="barcol"><div class="barv" style="height:${Math.max(12,x*1.45)}px" title="${x}/100"></div><b>${x}</b><br>${days[i]}</div>`).join('')}</div></div><div class="chartbox"><h3>Distribuição de risco</h3><div class="donut"></div><p class="muted" style="text-align:center">Crítico • Alto • Médio • Controlado</p></div></div>
+ <div class="monitor-grid" style="margin-top:14px"><div class="chartbox"><div class="docs-head"><div><h3>Eventos e achados prioritários</h3><p class="muted">Fila operacional correlacionando Security, GRC e Vulnerabilidades.</p></div><button class="btn secondary" onclick="go('vulnerabilities')">Abrir Vulnerabilidades</button></div>${events.length?events.map(e=>`<div class="event"><b>${esc(e.t)}</b><span class="muted">${esc(e.s)} • </span><span class="tag">${esc(e.sev)}</span></div>`).join(''):'<div class="notice">Nenhum evento prioritário.</div>'}</div><div class="chartbox"><h3>Threat Intelligence SAP — Risk Engine</h3><p>Correlação de severidade, exposição, criticidade do negócio e riscos de autorização.</p><div class="actions"><button class="btn" onclick="openRiskIdentification()">Identificar riscos</button><button class="btn secondary" onclick="openExposureAnalysis()">Analisar exposição</button><button class="btn secondary" onclick="openRiskPrioritization()">Priorizar</button><button class="btn secondary" onclick="openRemediationPlan()">Plano de ação</button></div><hr style="border-color:#1d3550"><h3>IA / Joule — recomendação</h3><p class="muted">Priorize primeiro itens críticos expostos e conflitos SoD ligados a processos financeiros; valide controles compensatórios antes do encerramento.</p><button class="btn secondary" onclick="go('ai')">Abrir IA / Joule</button></div></div>`;
+}
+
+async function security(){let base=`<h1>SAP Security</h1><div class="card purpose"><h3>Para que serve este módulo?</h3><p>Centraliza conhecimento e controles sobre usuários, roles, autorizações, acessos críticos, traces e evidências no SAP. É a base para aplicar menor privilégio, reduzir acessos indevidos e manter uma trilha auditável.</p></div><div class="grid"><div class="card"><h3>Role Design</h3><p>PFCG, SU24 e menor privilégio.</p><button class="btn" onclick="openTopic('roleDesign')">Abrir conteúdo</button></div><div class="card"><h3>Identity</h3><p>Usuários SAP e contas técnicas.</p><button class="btn" onclick="openTopic('identity')">Abrir conteúdo</button></div><div class="card"><h3>Risk Engine</h3><p>Achados, riscos e autorizações críticas.</p><button class="btn" onclick="openTopic('riskEngine')">Ver riscos e conteúdo</button></div><div class="card"><h3>Evidence</h3><p>Trilha de auditoria, logs e comprovação de controles.</p><button class="btn" onclick="openTopic('evidence')">Abrir auditoria e conteúdo</button></div></div>`;return base+await documentsPanel('security','SAP Security')}
+async function grc(){
+ let risks=await api("/api/grc/risks");
+ if(!Array.isArray(risks)) risks=Array.isArray(risks?.items)?risks.items:Array.isArray(risks?.risks)?risks.risks:(localDB.grcRisks||[]);
+ let base=`<h1>SAP GRC Access Control</h1>
+ <div class="card purpose"><h3>Para que serve este módulo?</h3><p>Centraliza governança de acessos, análise de riscos, Segregação de Funções (SoD), solicitações, ciclo de vida de roles e acessos emergenciais. Cada card abre uma explicação prática e detalhada.</p></div>
+ <div class="grid">
+  <div class="card"><h3>ARA</h3><p>Análise de riscos, conflitos SoD, ações e permissões críticas.</p><button class="btn" onclick="openTopic('ara')">Abrir ARA</button></div>
+  <div class="card"><h3>ARM</h3><p>Solicitações, aprovações, análise de risco e provisionamento de acesso.</p><button class="btn" onclick="openTopic('arm')">Abrir ARM</button></div>
+  <div class="card"><h3>BRM</h3><p>Governança do ciclo de vida de Business Roles.</p><button class="btn" onclick="openTopic('brm')">Abrir BRM</button></div>
+  <div class="card"><h3>EAM</h3><p>Firefighter, acesso emergencial, logs e revisão posterior.</p><button class="btn" onclick="openTopic('eam')">Abrir EAM</button></div>
+ </div>
+ <div class="card"><h3>Riscos GRC</h3><table class="table"><tr><th>ID</th><th>Risco</th><th>Área</th><th>Nível</th><th>Status</th></tr>${risks.map(r=>`<tr><td>${esc(r.id||'-')}</td><td>${esc(r.risk||r.title||'-')}</td><td>${esc(r.area||'-')}</td><td><span class="tag">${esc(r.level||r.severity||'-')}</span></td><td>${esc(r.status||'-')}</td></tr>`).join("")}</table></div>`;
+ return base+await documentsPanel('grc','SAP GRC')
+}
+
+async function submitNetlifyForm(name,data){let body=new URLSearchParams({"form-name":name,...data});let r=await fetch("/",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:body.toString()});if(!r.ok)throw Error("Não foi possível enviar o cadastro");return true}
+async function submitCveAlert(){
+ const data={name:document.getElementById('cveName')?.value.trim(),email:document.getElementById('cveEmail')?.value.trim(),company:document.getElementById('cveCompany')?.value.trim(),systems:document.getElementById('cveSystems')?.value.trim(),severity:document.getElementById('cveSeverity')?.value||'HIGH'};
+ if(!data.name||!data.email||!data.company||!data.systems){toast('Preencha nome, e-mail, empresa e sistemas');return}
+ try{
+  let r=await fetch('/cve-alerts-api',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+  let j=await r.json().catch(()=>({})); if(!r.ok) throw Error(j.error||'Falha ao cadastrar alerta');
+  toast('Cadastro recebido. ID: '+j.id);
+  let msg=document.getElementById('cveRegisterResult'); if(msg) msg.innerHTML=`<div class="notice"><b>Cadastro realizado.</b><br>ID: ${esc(j.id)} • Status: aguardando ativação pela equipe.</div>`;
+ }catch(e){toast('Erro no cadastro: '+e.message)}
+}
+async function vulnerabilities(){
+ let vs=await api("/api/vulnerabilities");
+ let base=`<h1>Vulnerabilidades & CVEs</h1>
+ <div class="card purpose"><h3>Para que serve este módulo?</h3><p>Centraliza vulnerabilidades relevantes para o ambiente SAP, classificação de severidade, acompanhamento de remediação e cadastro para alertas de CVE.</p></div>
+ <div class="grid">
+  <div class="card"><h3>Analisar vulnerabilidade</h3><p>Abra uma análise orientada sobre risco, impacto, prioridade e próximos passos.</p><button class="btn" onclick="openVulnerabilityAnalyzer()">Analisar agora</button></div>
+  <div class="card"><h3>Receber alertas de CVE</h3><p>Cadastre seu e-mail e os sistemas SAP de interesse.</p><button class="btn" onclick="document.getElementById('cveForm')?.scrollIntoView({behavior:'smooth'})">Cadastrar alertas</button></div>
+ </div>
+ <div class="card" id="cveForm"><h3>Receber alertas de CVE por e-mail</h3><p class="muted">Cadastre os sistemas de interesse. O cadastro fica disponível para a equipe ativar os alertas automáticos.</p><div class="formgrid"><div><label>Nome</label><input id="cveName"></div><div><label>E-mail</label><input id="cveEmail" type="email"></div><div><label>Empresa</label><input id="cveCompany"></div><div><label>Sistemas</label><input id="cveSystems" placeholder="S/4HANA, BTP, GRC..."></div><div><label>Severidade mínima</label><select id="cveSeverity"><option>CRITICAL</option><option>HIGH</option><option>MEDIUM</option></select></div><div style="align-self:end"><button class="btn" onclick="submitCveAlert()">Cadastrar alertas</button></div></div><div id="cveRegisterResult"></div></div>
+ <button class="btn secondary" onclick="createV()">+ Registrar vulnerabilidade</button>
+ <div class="card" style="margin-top:15px"><h3>Vulnerabilidades registradas</h3><table class="table"><tr><th>ID</th><th>Título</th><th>Sistema</th><th>Severidade</th><th>Status</th><th>Ação</th></tr>${vs.map(v=>`<tr><td>${esc(v.external_id||String(v.id).slice(0,8))}</td><td>${esc(v.title)}</td><td>${esc(v.system_name||"-")}</td><td><span class="tag">${esc(v.severity)}</span></td><td>${esc(v.status)}</td><td><button class="btn secondary" onclick='analyzeVulnerability(${JSON.stringify(JSON.stringify(v))})'>Analisar</button></td></tr>`).join("")}</table></div>`;
+ return base+await documentsPanel('vulnerabilities','Vulnerabilidades')
+}
+async function btp(){
+ let btpData=await api("/api/btp/assets");
+ let base=`<h1>SAP BTP Security</h1>
+ <div class="card purpose"><h3>Para que serve este módulo?</h3><p>Apresenta controles de identidade, autorização, conectividade, integrações e governança no SAP Business Technology Platform. Cada card abaixo abre uma explicação prática, como no módulo SAP GRC.</p></div>
+ <div class="grid">
+  <div class="card"><h3>Global Account & Subaccounts</h3><p>Estrutura, entitlements, ambientes e separação de responsabilidades.</p><button class="btn" onclick="openTopic('btpAccounts')">Abrir estrutura BTP</button></div>
+  <div class="card"><h3>IAM / Role Collections</h3><p>Usuários, grupos, roles e menor privilégio.</p><button class="btn" onclick="openTopic('btpRoles')">Abrir autorizações</button></div>
+  <div class="card"><h3>IAS / Trust</h3><p>SSO, MFA, federação e identidade corporativa.</p><button class="btn" onclick="openTopic('btpIAS')">Abrir identidade</button></div>
+  <div class="card"><h3>Cloud Connector</h3><p>Conectividade segura com ambientes privados.</p><button class="btn" onclick="openTopic('btpConnector')">Abrir conectividade</button></div>
+  <div class="card"><h3>Integration Suite</h3><p>APIs, integrações, certificados, secrets e monitoramento.</p><button class="btn" onclick="openTopic('btpIntegration')">Abrir Integration Suite</button></div>
+  <div class="card"><h3>Kyma / Cloud Foundry</h3><p>RBAC de runtime, aplicações, serviços e administração técnica.</p><button class="btn" onclick="openTopic('btpRuntime')">Abrir runtimes</button></div>
+ </div>
+ <div class="card"><h3>Ativos BTP</h3><table class="table"><tr><th>Ativo</th><th>Tipo</th><th>Risco</th><th>Status</th></tr>
+ ${btpData.map(a=>`<tr><td>${esc(a.name)}</td><td>${esc(a.type)}</td><td><span class="tag">${esc(a.risk)}</span></td><td>${esc(a.status)}</td></tr>`).join("")}</table></div>`;
+ return base+await documentsPanel('btp','SAP BTP')
+}
+async function compliance(){
+ let evidenceCount=(localDB.evidences||[]).length;
+ let base=`<h1>Compliance</h1>
+ <div class="card purpose"><h3>Para que serve este módulo?</h3><p>Organiza frameworks, requisitos, controles, testes e evidências para auditoria e conformidade. A visão conecta Segurança SAP, GRC, BTP, privacidade e continuidade.</p><button class="btn" onclick="openDetail('compliance')">Abrir visão dos frameworks</button></div>
+ <div class="card"><div class="docs-head"><div><h3>Evidências geradas</h3><p class="muted">Registros estruturados criados pelos controles abaixo.</p></div><span class="tag">${evidenceCount}</span></div>${evidenceCount?`<button class="btn secondary" onclick="openEvidenceLibrary()">Abrir biblioteca de evidências</button>`:'<div class="notice">Nenhuma evidência gerada ainda.</div>'}</div>
+ <div class="grid">${localDB.controls.map((c,i)=>`<div class="card"><h3>${esc(c.framework)}</h3><p>${esc(c.control)}</p><span class="tag">${esc(c.status)}</span><br><br><div class="actions"><button class="btn" onclick="openFramework(${i})">Abrir framework</button><button class="btn secondary" onclick="generateEvidence(${i})">Gerar evidência</button></div></div>`).join("")}</div>`;
+ return base+await documentsPanel('compliance','Compliance')+await mediaLibraryPanel('compliance-media','Compliance — Documentos, Vídeos e Áudios')
+}
+async function tickets(){return `<h1>Central de Suporte</h1><div class="card purpose"><h3>Para que serve este módulo?</h3><p>Permite abrir, consultar e acompanhar chamados de suporte relacionados a SAP Security, GRC, BTP, vulnerabilidades, acessos, integrações e incidentes.</p><div class="creator">Projeto idealizado por <strong>Jair Santana</strong></div></div><div class="card"><h3>Abrir chamado</h3><div class="formgrid"><div><label>Nome</label><input id="tkName"></div><div><label>E-mail</label><input id="tkEmail" type="email"></div><div><label>Empresa</label><input id="tkCompany"></div><div><label>Área</label><select id="tkArea"><option>SAP Security</option><option>SAP GRC</option><option>SAP BTP</option><option>SAP Governança</option><option>IA / Joule</option><option>Vulnerabilidades</option><option>Compliance</option><option>Integrações</option></select></div><div><label>Prioridade</label><select id="tkPriority"><option>Baixa</option><option selected>Média</option><option>Alta</option><option>Crítica</option></select></div><div><label>Assunto</label><input id="tkSubject"></div><div class="full"><label>Descrição</label><textarea id="tkDescription" placeholder="Descreva o problema, sistema afetado, erro e impacto."></textarea></div><div class="full"><button class="btn" onclick="submitSupportTicket()">Abrir chamado de suporte</button></div></div></div><div class="card"><div class="docs-head"><div><h3>Chamados cadastrados</h3><p class="muted">Clique em Abrir para consultar todos os dados e acompanhar o status.</p></div><span class="tag">${localDB.tickets.length}</span></div><table class="table"><tr><th>ID</th><th>Título</th><th>Prioridade</th><th>Status</th><th>Área</th><th>Ação</th></tr>${localDB.tickets.map(t=>`<tr><td><b>${esc(t.id)}</b></td><td><button class="ticket-title-btn" onclick="openTicket('${esc(t.id)}')">${esc(t.title)}</button></td><td>${esc(t.priority)}</td><td><span class="ticket-status">${esc(t.status)}</span></td><td>${esc(t.area)}</td><td><button class="btn secondary" onclick="openTicket('${esc(t.id)}')">Abrir</button></td></tr>`).join("")}</table></div>`}
+async function submitSupportTicket(){let data={name:document.getElementById('tkName').value.trim(),email:document.getElementById('tkEmail').value.trim(),company:document.getElementById('tkCompany').value.trim(),area:document.getElementById('tkArea').value,priority:document.getElementById('tkPriority').value,subject:document.getElementById('tkSubject').value.trim(),description:document.getElementById('tkDescription').value.trim()};if(!data.name||!data.email||!data.subject||!data.description){toast("Preencha nome, e-mail, assunto e descrição");return}let nums=(localDB.tickets||[]).map(t=>Number(String(t.id||'').replace(/\D/g,''))).filter(Number.isFinite);let next=Math.max(1000,...nums)+1;let id="INC-"+next;let created_at=new Date().toISOString();localDB.tickets.unshift({id,title:data.subject,priority:data.priority,status:"Aberto",area:data.area,name:data.name,email:data.email,company:data.company,description:data.description,created_at});localSave();try{await submitNetlifyForm("support-ticket",{...data,id,created_at});toast(id+" aberto com sucesso")}catch(e){toast(id+" salvo para atendimento")}await render();openTicket(id)}
+function openTicket(id){let t=(localDB.tickets||[]).find(x=>x.id===id);if(!t)return;document.getElementById('detailModal')?.remove();let created=t.created_at?new Date(t.created_at).toLocaleString('pt-BR'):'Registro de demonstração';let e=document.createElement('div');e.className='modalback';e.id='detailModal';e.innerHTML=`<div class="modal"><button class="close" onclick="closeDetail()">Fechar</button><span class="tag">${esc(t.id)}</span><h2>${esc(t.title)}</h2><div class="lesson"><div class="formgrid"><div><b>Status</b><p><span class="ticket-status">${esc(t.status)}</span></p></div><div><b>Prioridade</b><p>${esc(t.priority)}</p></div><div><b>Área</b><p>${esc(t.area)}</p></div><div><b>Data de abertura</b><p>${esc(created)}</p></div><div><b>Solicitante</b><p>${esc(t.name||'Não informado')}</p></div><div><b>E-mail</b><p>${esc(t.email||'Não informado')}</p></div><div><b>Empresa</b><p>${esc(t.company||'Não informada')}</p></div><div><b>ID do chamado</b><p>${esc(t.id)}</p></div></div></div><div class="lesson"><h3>Descrição do chamado</h3><p style="white-space:pre-wrap;line-height:1.6">${esc(t.description||'Chamado de demonstração criado antes da inclusão do campo de descrição detalhada.')}</p></div><div class="actions"><button class="btn" onclick="advanceTicket('${esc(t.id)}')">Avançar status</button><button class="btn secondary" onclick="closeDetail()">Voltar aos chamados</button></div><div class="creator" style="margin-top:18px">SAP Security Eixo • Idealizador: <strong>Jair Santana</strong></div></div>`;document.body.appendChild(e)}
+function newTicket(){go("tickets")}
+function advanceTicket(id){let t=localDB.tickets.find(x=>x.id===id);if(!t)return;let s=["Aberto","Em andamento","Resolvido"];let pos=s.indexOf(t.status);t.status=s[(pos<0?0:pos+1)%s.length];localSave();toast(id+" → "+t.status);openTicket(id);render()}
+
+async function cveAdmin(){
+ if(!['TENANT_ADMIN','SECURITY_MANAGER'].includes(session?.role)) return `<h1>Alertas CVE</h1><div class="notice">Acesso restrito à equipe administrativa.</div>`;
+ let items=[]; let config={openai:false,email:false};
+ try{let r=await fetch('/cve-alerts-api',{headers:{Authorization:'Bearer '+(session?.token||'')}});let j=await r.json();if(r.ok){items=j.items||[];config=j.config||config}}catch(e){}
+ return `<h1>Alertas CVE — Administração</h1><div class="card purpose"><h3>Empresas cadastradas</h3><p>Aqui a equipe visualiza quem pediu alertas, quais sistemas devem ser monitorados e ativa ou desativa o envio.</p></div>
+ <div class="grid"><div class="card"><h3>IA GPT</h3><p>${config.openai?'✅ Threat Intelligence público configurada':'⚠ Threat Intelligence público não configurada'}</p></div><div class="card"><h3>E-mail automático</h3><p>${config.email?'✅ Serviço de e-mail configurado':'⚠ Configure RESEND_API_KEY e ALERT_FROM_EMAIL'}</p></div></div>
+ <div class="card" style="margin-top:16px;overflow:auto"><table class="table"><tr><th>ID</th><th>Empresa</th><th>Contato</th><th>E-mail</th><th>Sistemas</th><th>Severidade</th><th>Status</th><th>Ações</th></tr>${items.length?items.map(x=>`<tr><td>${esc(x.id)}</td><td><b>${esc(x.company)}</b></td><td>${esc(x.name)}</td><td>${esc(x.email)}</td><td>${esc(x.systems)}</td><td>${esc(x.severity)}</td><td><span class="tag">${x.active?'ATIVO':'AGUARDANDO'}</span></td><td><div class="actions"><button class="btn secondary" onclick="setCveAlertStatus('${esc(x.id)}',${!x.active})">${x.active?'Desativar':'Ativar'}</button><button class="btn secondary" onclick="sendCveTest('${esc(x.id)}')">Enviar teste</button><button class="btn danger" onclick="deleteCveAlert('${esc(x.id)}')">Excluir</button></div></td></tr>`).join(''):'<tr><td colspan="8">Nenhuma empresa cadastrada ainda.</td></tr>'}</table></div>`;
+}
+async function setCveAlertStatus(id,active){try{let r=await fetch('/cve-alerts-api',{method:'PATCH',headers:{'Content-Type':'application/json',Authorization:'Bearer '+(session?.token||'')},body:JSON.stringify({id,active})});let j=await r.json();if(!r.ok)throw Error(j.error||'Falha');toast(active?'Alerta ativado':'Alerta desativado');render()}catch(e){toast('Erro: '+e.message)}}
+async function sendCveTest(id){try{toast('Enviando teste...');let r=await fetch('/cve-alerts-api?action=test-email',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+(session?.token||'')},body:JSON.stringify({id})});let j=await r.json();if(!r.ok)throw Error(j.error||'Falha');toast('E-mail de teste enviado')}catch(e){toast('Erro: '+e.message)}}
+async function deleteCveAlert(id){if(!confirm('Excluir este cadastro de alertas?'))return;try{let r=await fetch('/cve-alerts-api?id='+encodeURIComponent(id),{method:'DELETE',headers:{Authorization:'Bearer '+(session?.token||'')}});let j=await r.json();if(!r.ok)throw Error(j.error||'Falha');toast('Cadastro excluído');render()}catch(e){toast('Erro: '+e.message)}}
+
+async function academy(){
+ return `<h1>Academy</h1><div class="card purpose"><h3>Para que serve este módulo?</h3><p>Reúne cursos, trilhas, materiais e laboratórios para capacitação em SAP Security, GRC, BTP e segurança com IA.</p></div>
+ <div class="grid">${localDB.courses.map(c=>`<div class="card"><h3>${esc(c.name)}</h3><p>Progresso: <b>${c.progress}%</b></p><div style="height:8px;background:#07111f;border-radius:8px;overflow:hidden"><div style="height:100%;width:${c.progress}%;background:#35a7ff"></div></div><br><button class="btn secondary" onclick="openCourse('${esc(c.name)}')">Abrir curso</button></div>`).join("")}</div>`
+}
+
+async function articles(){
+ let items=(localDB.contents||[]).filter(x=>x.status==="PUBLISHED").sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)));
+ return `<h1>Artigos & Materiais</h1><div class="card purpose"><h3>Para que serve este módulo?</h3><p>Biblioteca pública de matérias, artigos, guias e materiais técnicos publicados pela administração do SAP Security Eixo.</p></div><div class="grid">${items.length?items.map(x=>`<div class="card article-card"><span class="tag">${esc(x.type)}</span><div class="article-meta">${esc(x.category)} • ${new Date(x.created_at).toLocaleDateString('pt-BR')}</div><h3>${esc(x.title)}</h3><p>${esc(x.summary||'')}</p><button class="btn secondary" onclick="openContent('${esc(x.id)}')">Ler conteúdo</button></div>`).join(""):'<div class="notice">Nenhum conteúdo publicado ainda.</div>'}</div>`
+}
+async function contentAdmin(){
+ let isAdmin=["TENANT_ADMIN","SECURITY_MANAGER"].includes(session?.role);
+ if(!isAdmin) return `<h1>Painel de Conteúdo</h1><div class="notice">Seu perfil não possui permissão para publicar conteúdo.</div>`;
+ let items=(localDB.contents||[]).slice().sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)));
+ return `<h1>Painel de Conteúdo</h1><p class="muted">Crie, edite e publique matérias, documentos, PDFs, vídeos e áudios.</p><button class="btn" onclick="editContent()">+ Nova matéria / artigo</button>${await mediaLibraryPanel('conteudo','Conteúdo Geral')}<div class="card" style="margin-top:15px"><table class="table"><tr><th>Título</th><th>Tipo</th><th>Categoria</th><th>Status</th><th>Data</th><th>Ações</th></tr>${items.map(x=>`<tr><td>${esc(x.title)}</td><td>${esc(x.type)}</td><td>${esc(x.category)}</td><td><span class="tag">${esc(x.status)}</span></td><td>${new Date(x.created_at).toLocaleDateString('pt-BR')}</td><td><div class="actions"><button class="btn secondary" onclick="editContent('${esc(x.id)}')">Editar</button><button class="btn secondary" onclick="toggleContent('${esc(x.id)}')">${x.status==='PUBLISHED'?'Despublicar':'Publicar'}</button><button class="btn secondary" onclick="deleteContent('${esc(x.id)}')">Excluir</button></div></td></tr>`).join("")}</table></div>`
+}
+function editContent(id){
+ let x=id?(localDB.contents||[]).find(a=>a.id===id):null;
+ let e=document.createElement('div');e.className='modalback';e.id='contentModal';
+ e.innerHTML=`<div class="modal"><button class="close" onclick="closeContentEditor()">Fechar</button><h2>${x?'Editar publicação':'Nova publicação'}</h2>
+ <div class="field"><label>Tipo</label><select id="ctType">${['Artigo','Material','Vídeo','Curso','Comunicado'].map(v=>`<option ${x?.type===v?'selected':''}>${v}</option>`).join('')}</select></div>
+ <div class="field"><label>Categoria</label><select id="ctCategory">${['SAP Security','SAP GRC','SAP BTP','IA / Joule','Compliance','Vulnerabilidades','Governança'].map(v=>`<option ${x?.category===v?'selected':''}>${v}</option>`).join('')}</select></div>
+ <div class="field"><label>Título</label><input id="ctTitle" value="${esc(x?.title||'')}"></div>
+ <div class="field"><label>Resumo</label><textarea id="ctSummary" style="min-height:90px">${esc(x?.summary||'')}</textarea></div>
+ <div class="field"><label>Conteúdo</label><textarea id="ctBody">${esc(x?.body||'')}</textarea></div>
+ <div class="field"><label>Autor</label><input id="ctAuthor" value="${esc(x?.author||session?.name||'Security Admin')}"></div>
+ <div class="actions"><button class="btn" onclick="saveContent('${esc(x?.id||'')}','DRAFT')">Salvar rascunho</button><button class="btn" onclick="saveContent('${esc(x?.id||'')}','PUBLISHED')">Salvar e publicar</button></div></div>`;
+ document.body.appendChild(e)
+}
+function saveContent(id,status){
+ let title=document.getElementById('ctTitle').value.trim(); if(!title){toast('Informe o título');return}
+ let current=id?(localDB.contents||[]).find(a=>a.id===id):null;
+ let obj={id:current?.id||('CNT-'+String((localDB.contents||[]).length+1).padStart(3,'0')),type:ctType.value,category:ctCategory.value,title,summary:ctSummary.value.trim(),body:ctBody.value.trim(),status,author:ctAuthor.value.trim()||session?.name||'Security Admin',created_at:current?.created_at||new Date().toISOString(),updated_at:new Date().toISOString()};
+ if(current) Object.assign(current,obj); else localDB.contents.unshift(obj);
+ localDB.audit.unshift({created_at:new Date().toLocaleString('pt-BR'),action:current?'content.update':'content.create',resource_type:obj.type,user_email:session.email});
+ localSave();closeContentEditor();go('contentAdmin');render();toast(status==='PUBLISHED'?'Conteúdo publicado':'Rascunho salvo')
+}
+function toggleContent(id){let x=(localDB.contents||[]).find(a=>a.id===id);if(!x)return;x.status=x.status==='PUBLISHED'?'DRAFT':'PUBLISHED';x.updated_at=new Date().toISOString();localSave();render();toast(x.status==='PUBLISHED'?'Conteúdo publicado':'Conteúdo despublicado')}
+function deleteContent(id){let x=(localDB.contents||[]).find(a=>a.id===id);if(!x)return;if(!confirm('Excluir esta publicação?'))return;localDB.contents=localDB.contents.filter(a=>a.id!==id);localSave();render();toast('Publicação excluída')}
+function openContent(id){let x=(localDB.contents||[]).find(a=>a.id===id);if(!x)return;let e=document.createElement('div');e.className='modalback';e.id='detailModal';e.innerHTML=`<div class="modal"><button class="close" onclick="closeDetail()">Fechar</button><span class="tag">${esc(x.type)}</span><h2>${esc(x.title)}</h2><p class="muted">${esc(x.category)} • ${esc(x.author)} • ${new Date(x.created_at).toLocaleDateString('pt-BR')}</p><p><b>${esc(x.summary||'')}</b></p><div class="lesson" style="white-space:pre-wrap;line-height:1.6">${esc(x.body||'')}</div></div>`;document.body.appendChild(e)}
+function closeContentEditor(){document.getElementById('contentModal')?.remove()}
+
+async function ai(){
+ let base=`<h1>IA / Joule</h1><div class="card purpose"><h3>Para que serve este módulo?</h3><p>Aplica IA como apoio à interpretação de riscos, SoD, vulnerabilidades, evidências e consultas de segurança. Os botões agora abrem um assunto específico antes de executar qualquer análise.</p></div>
+ <div class="grid">
+  <div class="card"><h3>Analisar vulnerabilidade</h3><p>Risco, impacto, criticidade, prioridade e próximos passos.</p><button class="btn" onclick="openTopic('jouleVulnerability')">Abrir análise de vulnerabilidade</button></div>
+  <div class="card"><h3>Analisar SoD</h3><p>Conflito, impacto no processo, mitigação e decisão.</p><button class="btn" onclick="openTopic('jouleSoD')">Abrir análise SoD</button></div>
+  <div class="card"><h3>Gerar evidência</h3><p>Estrutura evidência para auditoria, responsável e rastreabilidade.</p><button class="btn" onclick="openTopic('jouleEvidence')">Abrir geração de evidência</button></div>
+  <div class="card"><h3>Assistente de Segurança</h3><p>Perguntas contextuais sobre Security, GRC, BTP e Compliance.</p><button class="btn" onclick="openTopic('jouleAssistant')">Abrir assistente</button></div>
+ </div>
+ <div class="notice" id="aiout">O conteúdo base funciona sem IA. Dentro de cada assunto, o botão “Threat Intelligence SAP” pode complementar a análise quando a integração estiver configurada.</div>`;
+ return base+await documentsPanel('joule','IA / Joule')
+}
+async function aiRun(type){
+ let localMsg=type==="sod"?"Conflito SoD detectado: validar funções incompatíveis, impacto financeiro e controle compensatório.":type==="evidence"?"Evidência estruturada: usuário, role, risco, decisão, responsável, data e aprovação.":"Análise: priorizar risco, validar autorização, aplicar menor privilégio e registrar evidência.";
+ try{
+   let r=await api("/api/ai/analyze",{method:"POST",body:JSON.stringify({type,context:"tenant_security_context"})});
+   document.getElementById("aiout").textContent=r.analysis||localMsg;
+ }catch(e){document.getElementById("aiout").textContent=localMsg}
+ localDB.audit.unshift({created_at:new Date().toLocaleString("pt-BR"),action:"ai.analyze",resource_type:type,user_email:session.email});localSave()
+}
+async function billing(){
+ let planData=await api("/api/billing/plans");
+ return `<h1>Billing & Planos</h1><p class="muted">Estrutura comercial do SAP Security Hub SaaS.</p>
+ <div class="grid">${planData.map(p=>`<div class="card"><h2>${esc(p.name)}</h2><h3>${esc(p.price)}</h3><p><b>Usuários:</b> ${esc(p.users)}</p><p>${esc(p.modules)}</p><button class="btn ${p.name==="Professional"?"":"secondary"}" onclick="selectPlan('${p.name}')">${p.name==="Professional"?"Plano atual":"Selecionar"}</button></div>`).join("")}</div>
+ <div class="card"><h3>Assinatura atual</h3><p>Tenant: <b>${esc(session.tenant_name)}</b></p><p>Plano: <b>Professional</b></p><p>Status: <span class="tag">ACTIVE</span></p></div>`
+}
+function selectPlan(p){toast("Plano "+p+" selecionado para simulação comercial");localDB.audit.unshift({created_at:new Date().toLocaleString("pt-BR"),action:"billing.plan.select",resource_type:p,user_email:session.email});localSave()}
+async function settings(){
+ return `<h1>Configurações</h1><p class="muted">Tenant, segurança, integrações e operação.</p>
+ <div class="grid">
+  <div class="card"><h3>Tenant</h3><p>${esc(session.tenant_name)}</p><button class="btn secondary" onclick="toast('Tenant configurável')">Editar</button></div>
+  <div class="card"><h3>SSO / MFA</h3><p>Preparado para OIDC/Threat Intelligence2.</p><button class="btn secondary" onclick="toast('Configuração SSO preparada')">Configurar</button></div>
+  <div class="card"><h3>Notificações</h3><p>E-mail, webhook e alertas.</p><button class="btn secondary" onclick="toast('Notificações configuráveis')">Configurar</button></div>
+  <div class="card"><h3>Backup local</h3><p>Exportar dados da demonstração.</p><button class="btn secondary" onclick="exportBackup()">Exportar</button></div>
+ </div>`
+}
+function exportBackup(){let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(localDB,null,2)],{type:"application/json"}));a.download="sap-security-hub-backup.json";a.click();toast("Backup exportado")}
+
+
+
+const TOPICS={
+ roleDesign:{title:"Role Design — PFCG, SU24 e menor privilégio",area:"SAP Security",body:`<div class="lesson"><h3>O que é</h3><p>Role Design é a disciplina de transformar responsabilidades de negócio em acessos SAP controlados. A role deve entregar somente o necessário para a função do usuário, evitando permissões amplas e combinações desnecessárias.</p></div><div class="lesson"><h3>Como funciona na prática</h3><p><b>PFCG</b> é a transação central de manutenção de roles. O menu da role reúne transações, aplicações e serviços; o perfil de autorização define os objetos e valores permitidos. A <b>SU24</b> mantém propostas de autorização que ajudam a PFCG a preencher objetos e valores padrão de forma consistente.</p></div><div class="lesson"><h3>Boas práticas</h3><p>Desenhe roles por função de negócio, separe acessos operacionais de acessos privilegiados, use valores organizacionais restritos, evite curingas desnecessários, documente o proprietário da role e revise impactos de upgrade com SU25/SU24.</p></div><div class="lesson"><h3>O que revisar</h3><p>Transações críticas, objetos com ACTVT amplo, campos organizacionais, serviços RFC/OData, combinações SoD, usuários atribuídos, roles compostas/derivadas e evidências de aprovação.</p></div>`},
+ identity:{title:"Identity — Usuários SAP e contas técnicas",area:"SAP Security",body:`<div class="lesson"><h3>O que é</h3><p>Identity trata do ciclo de vida das identidades que acessam o SAP: criação, alteração, bloqueio, desligamento, autenticação e associação das roles corretas a cada usuário.</p></div><div class="lesson"><h3>Usuários humanos x contas técnicas</h3><p>Usuários dialog devem ser ligados a uma pessoa e a uma necessidade de negócio. Contas técnicas, de comunicação, batch ou integração precisam de proprietário, finalidade documentada, senha/segredo protegido e permissões estritamente limitadas.</p></div><div class="lesson"><h3>Controles importantes</h3><p>Recertificação periódica, bloqueio de contas inativas, revisão de usuários genéricos, MFA/SSO quando aplicável, segregação de administradores, expiração de acessos temporários e trilha de quem solicitou, aprovou e executou a mudança.</p></div><div class="lesson"><h3>Risco típico</h3><p>O maior problema não é apenas “quem tem acesso”, mas identidades sem dono, privilégios acumulados ao longo do tempo e contas técnicas com poderes além do necessário.</p></div>`},
+ riskEngine:{title:"Risk Engine — Riscos e autorizações críticas",area:"SAP Security",body:`<div class="lesson"><h3>O que é</h3><p>É a visão de risco aplicada aos acessos: identifica permissões críticas, combinações perigosas, privilégios excessivos e situações que podem permitir fraude, erro ou alteração indevida.</p></div><div class="lesson"><h3>O que analisar</h3><p>Ações críticas, permissões críticas, conflitos SoD, acesso administrativo, alterações em dados mestres, manutenção de usuários/roles, execução de programas sensíveis e acessos que contornam controles normais.</p></div><div class="lesson"><h3>Priorização</h3><p>Classifique por impacto, probabilidade, ambiente, criticidade do processo, quantidade de usuários afetados e existência de controle compensatório. Nem todo achado tem o mesmo peso.</p></div><div class="lesson"><h3>Resultado esperado</h3><p>Cada risco deve ter responsável, decisão, prazo e evidência: remover acesso, redesenhar role, mitigar temporariamente, monitorar ou aceitar formalmente o risco.</p></div>`},
+ evidence:{title:"Evidence — Trilha de auditoria e comprovação",area:"SAP Security",body:`<div class="lesson"><h3>O que é</h3><p>Evidence é o conjunto de registros que prova que o controle realmente existiu e foi executado. Em auditoria, não basta afirmar que o acesso é controlado; é preciso demonstrar quem solicitou, quem aprovou, o que mudou e quando.</p></div><div class="lesson"><h3>Exemplos de evidência</h3><p>Logs de alteração de usuários e roles, tickets aprovados, relatórios de recertificação, análise SoD, logs de Firefighter, traces de autorização, screenshots controladas, relatórios de execução e registros de remediação.</p></div><div class="lesson"><h3>Qualidade da evidência</h3><p>Deve ser rastreável, datada, íntegra, associada ao controle e ao responsável. Evidência manual sem contexto ou sem identificação costuma perder valor em auditoria.</p></div><div class="lesson"><h3>Uso executivo</h3><p>Uma boa trilha reduz tempo de auditoria, facilita investigação de incidentes e mostra que segurança, compliance e operação estão conectados.</p></div>`},
+ ara:{title:"ARA — Access Risk Analysis",area:"SAP GRC Access Control",body:`<div class="lesson"><h3>Para que serve</h3><p>ARA analisa riscos de acesso antes e depois da concessão. Ele procura conflitos de Segregação de Funções (SoD), ações críticas e permissões críticas em usuários, roles, perfis e outros objetos suportados pelo SAP Access Control.</p></div><div class="lesson"><h3>Exemplo simples</h3><p>Se uma pessoa pode criar um fornecedor e também efetuar um pagamento, existe um risco de concentração de atividades incompatíveis. O ARA identifica essa combinação com base no Rule Set configurado.</p></div><div class="lesson"><h3>Como usar bem</h3><p>Mantenha o Rule Set alinhado ao processo real da empresa, execute sincronizações corretamente, valide falsos positivos, simule riscos antes de aprovar acessos e diferencie risco técnico de risco de negócio.</p></div><div class="lesson"><h3>Resultado</h3><p>O ARA ajuda o aprovador a decidir se o acesso deve ser removido, alterado, mitigado ou aceito. A qualidade da análise depende diretamente da qualidade do Rule Set e dos dados sincronizados.</p></div>`},
+ arm:{title:"ARM — Access Request Management",area:"SAP GRC Access Control",body:`<div class="lesson"><h3>Para que serve</h3><p>ARM organiza solicitações de acesso em um fluxo controlado: quem pede, qual acesso precisa, por que precisa, quem deve aprovar e como o acesso será provisionado.</p></div><div class="lesson"><h3>Fluxo típico</h3><p>Solicitação → análise de risco → aprovação do gestor ou owner → aprovação de segurança quando necessária → provisionamento → registro de resultado. O workflow pode ser desenhado com MSMP.</p></div><div class="lesson"><h3>Valor para a empresa</h3><p>Reduz concessões informais, padroniza aprovações, cria rastreabilidade e permite incorporar análise SoD antes da liberação do acesso.</p></div><div class="lesson"><h3>Pontos de atenção</h3><p>Catálogo de roles claro, aprovadores corretos, regras de caminho bem definidas, prazos, tratamento de rejeições, acessos temporários e integração com os sistemas-alvo.</p></div>`},
+ brm:{title:"BRM — Business Role Management",area:"SAP GRC Access Control",body:`<div class="lesson"><h3>Para que serve</h3><p>BRM governa o ciclo de vida das Business Roles. Ele ajuda a estruturar criação, alteração, aprovação, documentação e manutenção das roles de forma padronizada.</p></div><div class="lesson"><h3>Por que é importante</h3><p>Sem governança de roles, o ambiente tende a acumular roles duplicadas, antigas, sem owner, com nomenclatura inconsistente e permissões excessivas. BRM cria disciplina sobre esse ciclo.</p></div><div class="lesson"><h3>O que uma boa role deve ter</h3><p>Nome padronizado, descrição de negócio, responsável, sistema-alvo, metodologia de desenho, riscos conhecidos, etapa de aprovação, documentação e revisão periódica.</p></div><div class="lesson"><h3>Resultado</h3><p>Roles mais previsíveis, menos retrabalho, melhor integração entre Segurança SAP e GRC e maior facilidade para auditoria e recertificação.</p></div>`},
+ eam:{title:"EAM — Emergency Access Management",area:"SAP GRC Access Control",body:`<div class="lesson"><h3>Para que serve</h3><p>EAM controla acesso emergencial privilegiado, normalmente conhecido como Firefighter. Ele permite executar atividades excepcionais sem transformar o usuário em administrador permanente.</p></div><div class="lesson"><h3>Como funciona</h3><p>O acesso é vinculado a uma necessidade, período, sistema e responsável. As atividades realizadas são registradas e depois revisadas pelo controller ou responsável definido.</p></div><div class="lesson"><h3>Quando usar</h3><p>Incidentes críticos, correções urgentes, atividades de suporte ou situações excepcionais em que o acesso normal não é suficiente e o tempo de resposta é importante.</p></div><div class="lesson"><h3>Controles indispensáveis</h3><p>Owner e controller definidos, justificativa, validade curta, logs completos, revisão posterior, tratamento de exceções e proibição de usar Firefighter como substituto permanente de um desenho de acesso correto.</p></div>`},
+ btpAccounts:{title:"Global Account & Subaccounts — Estrutura segura",area:"SAP BTP",body:`<div class="lesson"><h3>Para que serve</h3><p>Global Account, directories e subaccounts organizam a paisagem BTP. A segurança começa separando ambientes, responsabilidades e entitlements para evitar administração excessivamente centralizada.</p></div><div class="lesson"><h3>O que revisar</h3><p>Administradores de Global Account, membros de subaccounts, entitlements, regiões, contas produtivas versus não produtivas, ownership e acesso de equipes externas.</p></div><div class="lesson"><h3>Boa prática</h3><p>Use menor privilégio, segregue produção de desenvolvimento, mantenha poucos administradores globais e revise acessos de plataforma periodicamente.</p></div>`},
+ btpRoles:{title:"IAM & Role Collections — Autorização no BTP",area:"SAP BTP",body:`<div class="lesson"><h3>Para que serve</h3><p>Role Collections agrupam roles técnicas em conjuntos de negócio para atribuição a usuários e grupos. Elas são o ponto central de autorização em muitos cenários BTP.</p></div><div class="lesson"><h3>Risco principal</h3><p>Coleções administrativas amplas, atribuições diretas sem owner e acúmulo de privilégios podem dar acesso a configuração, serviços e dados sensíveis.</p></div><div class="lesson"><h3>Boas práticas</h3><p>Separar administração de visualização, atribuir por grupo quando possível, recertificar acessos e controlar roles com privilégios críticos.</p></div>`},
+ btpIAS:{title:"IAS / Trust — Identidade e autenticação",area:"SAP BTP",body:`<div class="lesson"><h3>Para que serve</h3><p>SAP Cloud Identity Services pode atuar como camada de identidade para autenticação, SSO, MFA e federação com o provedor corporativo.</p></div><div class="lesson"><h3>O que governar</h3><p>Trust configuration, grupos, atributos, políticas de autenticação, MFA para perfis privilegiados, ciclo de vida de usuários e integração com diretórios corporativos.</p></div><div class="lesson"><h3>Resultado esperado</h3><p>Identidade centralizada, menos credenciais locais e maior rastreabilidade sobre quem autentica e como recebe autorização.</p></div>`},
+ btpConnector:{title:"Cloud Connector — Conectividade segura",area:"SAP BTP",body:`<div class="lesson"><h3>Para que serve</h3><p>Cria um canal controlado entre aplicações BTP e recursos on-premise sem expor diretamente os sistemas internos à internet.</p></div><div class="lesson"><h3>O que revisar</h3><p>Sistemas mapeados, recursos e paths expostos, administradores, certificados, disponibilidade, logs e princípio de exposição mínima.</p></div><div class="lesson"><h3>Risco principal</h3><p>Expor mais recursos do que o necessário ou manter administração ampla pode ampliar o impacto de uma credencial comprometida.</p></div>`},
+ btpIntegration:{title:"Integration Suite — Segurança de integrações",area:"SAP BTP",body:`<div class="lesson"><h3>Para que serve</h3><p>Centraliza integrações, APIs e fluxos entre SAP, parceiros e aplicações. Segurança envolve autenticação, autorização, certificados, keystore, secrets, endpoints e monitoramento.</p></div><div class="lesson"><h3>Controles importantes</h3><p>Threat Intelligence2 quando aplicável, certificados com ciclo de vida controlado, secrets fora de scripts, validação de payload, menor privilégio nos adaptadores e logs para troubleshooting e auditoria.</p></div><div class="lesson"><h3>Operação</h3><p>Monitore falhas, expiração de certificados, mudanças em endpoints, volumes anormais e integrações críticas de negócio.</p></div>`},
+ btpRuntime:{title:"Cloud Foundry & Kyma — Segurança de runtime",area:"SAP BTP",body:`<div class="lesson"><h3>Cloud Foundry</h3><p>Controle organizações, spaces, roles técnicas, service bindings, variáveis e credenciais. Perfis de desenvolvedor podem ter acesso a dados sensíveis e devem ser restritos em produção.</p></div><div class="lesson"><h3>Kyma</h3><p>Kyma usa RBAC do Kubernetes com Roles, ClusterRoles, RoleBindings e ClusterRoleBindings. Separe operadores de desenvolvedores e limite cluster-admin.</p></div><div class="lesson"><h3>Boas práticas</h3><p>Segregação por ambiente, secrets protegidos, logging, imagens confiáveis, revisão de bindings e redução de privilégios permanentes.</p></div>`},
+ govPolicies:{title:"Políticas & Diretrizes — SAP Governança",area:"SAP Governança",body:`<div class="lesson"><h3>Objetivo</h3><p>Transformar princípios de segurança em regras claras: quem pode solicitar, aprovar, administrar, revisar e aceitar riscos.</p></div><div class="lesson"><h3>Conteúdo mínimo</h3><p>Política de acessos, privileged access, contas técnicas, recertificação, SoD, evidências, exceções, retenção de logs e responsabilidades.</p></div>`},
+ govRisks:{title:"Riscos & Controles — SAP Governança",area:"SAP Governança",body:`<div class="lesson"><h3>Objetivo</h3><p>Manter visão única de risco, controle, responsável, prazo e situação. O risco deve estar ligado a uma decisão, não apenas a um relatório.</p></div><div class="lesson"><h3>Prática</h3><p>Classifique impacto e probabilidade, associe controles preventivos/detectivos, defina owner e acompanhe plano de ação até o encerramento.</p></div>`},
+ govRecert:{title:"Recertificação — SAP Governança",area:"SAP Governança",body:`<div class="lesson"><h3>Objetivo</h3><p>Confirmar periodicamente se usuários, roles, acessos críticos e exceções continuam necessários.</p></div><div class="lesson"><h3>Boa recertificação</h3><p>Tem owner correto, prazo, evidência da decisão, tratamento de não resposta e remoção efetiva do acesso rejeitado.</p></div>`},
+ govMetrics:{title:"Indicadores & KRIs — SAP Governança",area:"SAP Governança",body:`<div class="lesson"><h3>Indicadores úteis</h3><p>Conflitos SoD abertos, tempo de remediação, acessos privilegiados, Firefighters sem revisão, usuários inativos, exceções vencidas, vulnerabilidades críticas e controles sem evidência.</p></div><div class="lesson"><h3>Valor executivo</h3><p>Mostram tendência, exposição e capacidade de resposta, permitindo priorizar investimento e cobrar responsáveis.</p></div>`},
+ govRaci:{title:"Responsabilidades — Owners, Aprovadores e RACI",area:"SAP Governança",body:`<div class="lesson"><h3>Objetivo</h3><p>Eliminar dúvidas sobre quem decide, quem executa, quem revisa e quem precisa ser informado.</p></div><div class="lesson"><h3>Modelo prático</h3><p>Negócio define necessidade; owner aprova; Segurança valida riscos; TI executa; Compliance/Auditoria verifica; gestão acompanha exceções e indicadores.</p></div>`},
+ govExceptions:{title:"Exceções & Aceite de Risco",area:"SAP Governança",body:`<div class="lesson"><h3>Quando usar</h3><p>Quando o risco não pode ser eliminado imediatamente e existe justificativa de negócio.</p></div><div class="lesson"><h3>Obrigatório</h3><p>Responsável, justificativa, impacto, controle compensatório, prazo de validade, aprovação e revisão antes do vencimento.</p></div>`},
+ jouleVulnerability:{title:"IA/Joule — Análise de Vulnerabilidade",area:"IA / Joule",body:`<div class="lesson"><h3>O que a análise deve responder</h3><p>Qual ativo é afetado, qual impacto, severidade, exposição, probabilidade, dependências, prioridade e plano de remediação.</p></div><div class="lesson"><h3>Uso seguro da IA</h3><p>A IA deve apoiar a interpretação, não substituir validação técnica. Resultados precisam de contexto autorizado, logging e revisão humana antes de ações críticas.</p></div>`},
+ jouleSoD:{title:"IA/Joule — Análise de conflito SoD",area:"IA / Joule",body:`<div class="lesson"><h3>Objetivo</h3><p>Explicar o conflito em linguagem simples: quais funções se chocam, que fraude/erro podem permitir, quem é afetado e quais opções existem.</p></div><div class="lesson"><h3>Saída esperada</h3><p>Remover acesso, redesenhar role, separar atividades ou aplicar mitigação temporária com owner e evidência.</p></div>`},
+ jouleEvidence:{title:"IA/Joule — Geração de Evidência",area:"IA / Joule",body:`<div class="lesson"><h3>Objetivo</h3><p>Organizar evidência com controle, período, responsável, fonte, resultado, exceção e conclusão.</p></div><div class="lesson"><h3>Qualidade</h3><p>A evidência deve ser rastreável, datada, íntegra e ligada a uma decisão ou controle verificável.</p></div>`},
+ jouleAssistant:{title:"IA/Joule — Assistente de Segurança",area:"IA / Joule",body:`<div class="lesson"><h3>Uso</h3><p>Responder dúvidas sobre Security, GRC, BTP, Compliance e vulnerabilidades, explicando termos, riscos e próximos passos.</p></div><div class="lesson"><h3>Governança</h3><p>Limite o contexto ao que o usuário está autorizado a ver, registre consultas sensíveis e exija validação humana para alterações ou decisões de risco.</p></div>`}
+};
+function openTopic(key){let d=TOPICS[key];if(!d)return;let e=document.createElement('div');e.className='modalback';e.id='detailModal';e.innerHTML=`<div class="modal"><button class="close" onclick="closeDetail()">Fechar</button><span class="tag">${esc(d.area)}</span><h2>${esc(d.title)}</h2><p class="muted">Conteúdo explicativo em linguagem prática. Use a atualização por IA quando quiser uma visão mais recente.</p><div id="topicBody">${d.body}</div><div class="card" style="margin-top:16px"><h3>Atualização inteligente</h3><p class="muted">Consulta a IA GPT com pesquisa web para complementar este assunto com informações atuais. Quando disponível, prioriza fontes oficiais da SAP.</p><button class="btn" id="aiTopicBtn" onclick="refreshTopicWithAI('${key}')">Threat Intelligence SAP</button><div id="aiTopicResult"></div></div></div>`;document.body.appendChild(e)}
+
+async function checkGPTStatus(){
+ try{
+  let r=await fetch('/threat-intel'); let j=await r.json().catch(()=>({}));
+  let msg=j.configured?'IA GPT configurada no servidor.':'IA GPT sem chave válida configurada.';
+  toast(msg);
+ }catch(e){toast('Não foi possível verificar a IA GPT')}
+}
+async function refreshTopicWithAI(key){
+ let d=TOPICS[key],btn=document.getElementById('aiTopicBtn'),out=document.getElementById('aiTopicResult');
+ if(!d||!out)return;
+ btn.disabled=true; btn.textContent='Analisando ameaça...';
+ out.innerHTML='<div class="notice" style="margin-top:12px">Consultando inteligência pública atual sobre '+esc(d.title)+'...</div>';
+ try{
+  let r=await fetch('/threat-intel',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+   mode:'topic',topic:key,title:d.title,area:d.area
+  })});
+  let j=await r.json().catch(()=>({}));
+  if(!r.ok)throw Error(j.error||'IA indisponível');
+  out.innerHTML=`<div class="lesson" style="margin-top:12px"><h3>Threat Intelligence SAP</h3>
+  <div style="white-space:pre-wrap;line-height:1.65">${esc(j.text||'Sem conteúdo retornado.')}</div>
+  ${j.generated_at?`<p class="muted">Pesquisa atualizada em ${new Date(j.generated_at).toLocaleString('pt-BR')}</p>`:''}</div>`;
+ }catch(err){
+  let msg=String(err.message||err); if(/issuer/i.test(msg)) msg='A chave configurada não é uma API key válida da Threat Intelligence. Use uma chave Threat Intelligence... em Threat Intelligence público na Netlify.';
+  let hint=msg.includes('Threat Intelligence público')
+   ?'<br><b>Ação necessária:</b> cadastrar uma chave válida da Threat Intelligence em Threat Intelligence público na Netlify.'
+   :'';
+  out.innerHTML=`<div class="notice" style="margin-top:12px"><b>A análise de Threat Intelligence não foi concluída.</b><br>${esc(msg)}${hint}</div>`;
+ }finally{btn.disabled=false;btn.textContent='Threat Intelligence SAP'}
+}
+
+
+function openFramework(index){
+ let c=localDB.controls[index]; if(!c)return;
+ let key='framework_'+String(c.framework).toLowerCase().replace(/[^a-z0-9]+/g,'_');
+ let body=`<div class="lesson"><h3>Objetivo do framework</h3><p>${esc(c.control)}</p></div><div class="lesson"><h3>Aplicação no ambiente SAP</h3><p>Relacione requisitos a usuários, roles, SoD, acessos privilegiados, logs, vulnerabilidades, mudanças e evidências. Defina owner, frequência de teste e critério de conformidade.</p></div><div class="lesson"><h3>Status atual</h3><p>${esc(c.status)}</p></div>`;
+ let e=document.createElement('div');e.className='modalback';e.id='detailModal';e.innerHTML=`<div class="modal"><button class="close" onclick="closeDetail()">Fechar</button><span class="tag">Compliance</span><h2>${esc(c.framework)}</h2>${body}<div class="actions"><button class="btn" onclick="generateEvidence(${index})">Gerar evidência</button><button class="btn secondary" onclick="refreshGenericWithAI('${esc(c.framework)}','Compliance')">Threat Intelligence SAP</button></div><div id="genericAIResult"></div></div>`;document.body.appendChild(e)
+}
+function generateEvidence(index){
+ let c=localDB.controls[index]; if(!c)return;
+ let now=new Date(), id='EVD-'+String((localDB.evidences||[]).length+1).padStart(4,'0');
+ let ev={id,framework:c.framework,control:c.control,status:c.status,generated_at:now.toISOString(),generated_by:session?.email||'visitante',tenant:session?.tenant_name||'SAP Security Eixo',result:c.status==='Conforme'?'Controle registrado como conforme; validar anexos e amostra antes de auditoria final.':'Controle requer revisão ou plano de ação antes de conclusão.',recommended_actions:['Validar owner do controle','Confirmar período e escopo','Anexar relatório/log/ticket de origem','Registrar exceções e aprovações','Revisar conclusão com responsável']};
+ localDB.evidences.unshift(ev);localDB.audit.unshift({created_at:now.toLocaleString('pt-BR'),action:'compliance.evidence.generate',resource_type:c.framework,user_email:session?.email||'guest'});localSave();
+ showEvidence(ev);toast('Evidência '+id+' gerada')
+}
+function showEvidence(ev){
+ document.getElementById('detailModal')?.remove();
+ let e=document.createElement('div');e.className='modalback';e.id='detailModal';e.innerHTML=`<div class="modal"><button class="close" onclick="closeDetail()">Fechar</button><span class="tag">${esc(ev.id)}</span><h2>Evidência — ${esc(ev.framework)}</h2><div class="lesson"><p><b>Controle:</b> ${esc(ev.control)}</p><p><b>Status:</b> ${esc(ev.status)}</p><p><b>Gerada em:</b> ${new Date(ev.generated_at).toLocaleString('pt-BR')}</p><p><b>Responsável pelo registro:</b> ${esc(ev.generated_by)}</p><p><b>Tenant:</b> ${esc(ev.tenant)}</p></div><div class="lesson"><h3>Conclusão automática</h3><p>${esc(ev.result)}</p></div><div class="lesson"><h3>Checklist de comprovação</h3><ul>${ev.recommended_actions.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div><div class="actions"><button class="btn" onclick="downloadEvidence('${esc(ev.id)}')">Baixar evidência</button><button class="btn secondary" onclick="go('compliance');closeDetail()">Voltar ao Compliance</button></div></div>`;document.body.appendChild(e)
+}
+function downloadEvidence(id){
+ let ev=(localDB.evidences||[]).find(x=>x.id===id);if(!ev)return;
+ let text=`SAP SECURITY EIXO - EVIDÊNCIA DE COMPLIANCE\n\nID: ${ev.id}\nFramework: ${ev.framework}\nControle: ${ev.control}\nStatus: ${ev.status}\nGerada em: ${new Date(ev.generated_at).toLocaleString('pt-BR')}\nResponsável: ${ev.generated_by}\nTenant: ${ev.tenant}\n\nConclusão:\n${ev.result}\n\nChecklist:\n- ${ev.recommended_actions.join('\n- ')}\n`;
+ let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'}));a.download=ev.id+'_'+ev.framework.replace(/[^a-z0-9]+/gi,'_')+'.txt';a.click();URL.revokeObjectURL(a.href)
+}
+function openEvidenceLibrary(){
+ let items=localDB.evidences||[];let e=document.createElement('div');e.className='modalback';e.id='detailModal';e.innerHTML=`<div class="modal"><button class="close" onclick="closeDetail()">Fechar</button><h2>Biblioteca de Evidências</h2>${items.map(ev=>`<div class="doc-row"><div><b>${esc(ev.id)} — ${esc(ev.framework)}</b><div class="doc-meta">${new Date(ev.generated_at).toLocaleString('pt-BR')} • ${esc(ev.status)}</div></div><button class="btn secondary" onclick="showEvidence((localDB.evidences||[]).find(x=>x.id==='${esc(ev.id)}'))">Abrir</button></div>`).join('')||'<div class="notice">Nenhuma evidência gerada.</div>'}</div>`;document.body.appendChild(e)
+}
+async function refreshGenericWithAI(title,area,contextData){
+ let out=document.getElementById('genericAIResult');if(!out)return;
+ out.innerHTML='<div class="notice" style="margin-top:12px">Correlacionando ameaça, exposição e inteligência atual...</div>';
+ try{
+  let payload={mode:area==='Vulnerabilidades'?'vulnerability':'generic',topic:title,title,area,context:contextData||null};
+  let r=await fetch('/threat-intel',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  let j=await r.json().catch(()=>({}));
+  if(!r.ok)throw Error(j.error||'IA indisponível');
+  out.innerHTML=`<div class="lesson" style="margin-top:12px"><h3>${area==='Vulnerabilidades'?'Threat Intelligence — Plano de Resposta':'Threat Intelligence SAP'}</h3>
+  <div style="white-space:pre-wrap;line-height:1.65">${esc(j.text||'Sem conteúdo retornado.')}</div>
+  ${j.generated_at?`<p class="muted">Pesquisa atualizada em ${new Date(j.generated_at).toLocaleString('pt-BR')}</p>`:''}</div>`;
+ }catch(e){
+  let msg=String(e.message||e); if(/issuer/i.test(msg)) msg='A chave configurada não é uma API key válida da Threat Intelligence. Use uma chave Threat Intelligence... em Threat Intelligence público na Netlify.';
+  out.innerHTML=`<div class="notice" style="margin-top:12px"><b>Não foi possível concluir a análise de Threat Intelligence.</b><br>${esc(msg)}${msg.includes('Threat Intelligence público')?'<br>Cadastre uma chave válida em <b>Threat Intelligence público</b> na Netlify.':''}</div>`;
+ }
+}
+function openVulnerabilityAnalyzer(){
+ let e=document.createElement('div');e.className='modalback';e.id='detailModal';e.innerHTML=`<div class="modal"><button class="close" onclick="closeDetail()">Fechar</button><h2>Analisar vulnerabilidade</h2><div class="field"><label>CVE ou título</label><input id="vaTitle" placeholder="Ex.: CVE-2026-XXXX ou falha em componente SAP"></div><div class="field"><label>Sistema/Componente</label><input id="vaSystem" placeholder="S/4HANA, BTP, NetWeaver..."></div><div class="field"><label>Severidade</label><select id="vaSeverity"><option>CRITICAL</option><option>HIGH</option><option>MEDIUM</option><option>LOW</option></select></div><button class="btn" onclick="runVulnerabilityForm()">Gerar análise</button><div id="vaResult"></div></div>`;document.body.appendChild(e)
+}
+function runVulnerabilityForm(){analyzeVulnerability(JSON.stringify({title:vaTitle.value||'Vulnerabilidade informada',system_name:vaSystem.value||'SAP',severity:vaSeverity.value,status:'OPEN'}))}
+function threatScore(v){
+ let sev=String(v.severity||'HIGH').toUpperCase();
+ let score={CRITICAL:88,HIGH:72,MEDIUM:48,LOW:25}[sev]||55;
+ let txt=(String(v.title||'')+' '+String(v.description||'')+' '+String(v.external_id||v.cve||'')).toLowerCase();
+ if(/cve-\d{4}-\d+/.test(txt)) score+=4;
+ if(/exploit|rce|remote code|authentication bypass|privilege escalation|actively exploited|kev/.test(txt)) score+=7;
+ if(/internet|public|external|exposed/.test(txt)) score+=4;
+ return Math.min(100,score);
+}
+function threatLevel(score){return score>=90?'CRÍTICO':score>=75?'ALTO':score>=50?'MODERADO':'BAIXO'}
+
+let currentVulnerabilityAIContext=null;
+function analyzeVulnerability(vraw){
+ let v=typeof vraw==='string'?JSON.parse(vraw):vraw;
+ let sev=String(v.severity||'HIGH').toUpperCase(),priority=sev==='CRITICAL'?'Imediata':sev==='HIGH'?'Alta':sev==='MEDIUM'?'Média':'Planejada';
+ currentVulnerabilityAIContext={
+  cve:v.external_id||v.cve||'',
+  title:v.title||v.external_id||'Vulnerabilidade SAP',
+  system:v.system_name||'SAP',
+  severity:sev,
+  status:v.status||'OPEN',
+  description:v.description||''
+ };
+ let score=threatScore(v),level=threatLevel(score);
+ let result=`<div class="card" style="margin-top:12px"><div class="docs-head"><div><h2>🛡️ SAP Threat Score™</h2><p class="muted">Priorização técnica inicial da ameaça</p></div><div style="font-size:28px;font-weight:800">${score}/100 — ${level}</div></div></div>
+ <div class="grid" style="margin-top:12px"><div class="card"><h3>🔴 Analisar Ameaça</h3><p>Correlaciona CVE, severidade, exploração conhecida e impacto.</p></div><div class="card"><h3>🎯 Verificar Exposição</h3><p>Valida componente, versão, superfície exposta e controles.</p></div><div class="card"><h3>🛡️ Plano de Remediação</h3><p>Prioriza mitigação, correção, testes e janela de mudança.</p></div><div class="card"><h3>📑 Gerar Evidência</h3><p>Define evidências para auditoria e encerramento do risco.</p></div></div>
+ <div class="lesson" style="margin-top:12px"><h3>Análise orientada</h3>
+ <p><b>Vulnerabilidade:</b> ${esc(currentVulnerabilityAIContext.title)}</p>
+ <p><b>CVE:</b> ${esc(currentVulnerabilityAIContext.cve||'Não informada')}</p>
+ <p><b>Sistema:</b> ${esc(currentVulnerabilityAIContext.system)}</p>
+ <p><b>Severidade:</b> ${esc(sev)}</p><p><b>Prioridade inicial:</b> ${priority}</p></div>
+ <div class="lesson"><h3>Plano inicial de resposta</h3><ol>
+ <li>Confirmar se o componente e a versão afetados existem no ambiente.</li>
+ <li>Validar exposição, exploração conhecida e controles compensatórios.</li>
+ <li>Consultar nota/correção oficial do fornecedor.</li>
+ <li>Planejar correção, teste e janela de mudança.</li>
+ <li>Registrar evidência da remediação e revalidar o risco.</li></ol></div>
+ <div class="actions"><button class="btn" onclick="refreshGenericWithAI(currentVulnerabilityAIContext.title,'Vulnerabilidades',currentVulnerabilityAIContext)">Executar Threat Intelligence</button></div>
+ <div id="genericAIResult"></div>`;
+ let out=document.getElementById('vaResult');if(out){out.innerHTML=result;return}
+ let e=document.createElement('div');e.className='modalback';e.id='detailModal';e.innerHTML=`<div class="modal"><button class="close" onclick="closeDetail()">Fechar</button><h2>Analisar vulnerabilidade</h2>${result}</div>`;document.body.appendChild(e)
+}
+
+const DETAIL={
+ security:{title:"SAP Security — Conteúdo",body:`<div class="lesson"><h3>Role Design / PFCG</h3><p>Criação e manutenção de Single, Composite e Derived Roles, segregação por função e menor privilégio.</p></div><div class="lesson"><h3>SU24 e Propostas de Autorização</h3><p>Manutenção das propostas de objetos, valores padrão e desenho consistente de roles.</p></div><div class="lesson"><h3>SU53 / ST01 / Traces</h3><p>Diagnóstico de falhas de autorização, rastreabilidade e troubleshooting de acessos.</p></div><div class="lesson"><h3>Usuários e Contas Técnicas</h3><p>Lifecycle de usuários, bloqueios, recertificação, contas privilegiadas e controles compensatórios.</p></div>`},
+ grc:{title:"SAP GRC Access Control",body:`<div class="lesson"><h3>ARA — Access Risk Analysis</h3><p>Análise de conflitos SoD, riscos críticos, simulação de acesso e avaliação por usuário/role.</p></div><div class="lesson"><h3>ARM — Access Request Management</h3><p>Solicitações de acesso com workflow, aprovação, provisioning e trilha de auditoria.</p></div><div class="lesson"><h3>BRM — Business Role Management</h3><p>Governança do ciclo de vida das roles, aprovação, metodologia e documentação.</p></div><div class="lesson"><h3>EAM — Emergency Access Management</h3><p>Firefighter, acesso emergencial controlado, logs e revisão posterior.</p></div><div class="lesson"><h3>MSMP / Rule Set</h3><p>Workflows, estágios, agentes, regras de caminho, funções e manutenção do Rule Set.</p></div>`},
+ btp:{title:"SAP BTP Security",body:`<div class="lesson"><h3>Global Account e Subaccounts</h3><p>Estrutura de conta, entitlements, ambientes e separação por paisagem.</p></div><div class="lesson"><h3>IAS / IAM</h3><p>SSO, MFA, identidade federada e autenticação centralizada.</p></div><div class="lesson"><h3>Role Collections</h3><p>Autorização no BTP com coleções de roles, princípio do menor privilégio e recertificação.</p></div><div class="lesson"><h3>Cloud Connector</h3><p>Conectividade segura entre cloud e on-premise, exposição mínima de recursos e auditoria.</p></div><div class="lesson"><h3>Integration Suite</h3><p>Segurança de APIs e integrações, certificados, keystore, Threat Intelligence2, SFTP e monitoramento.</p></div>`},
+ compliance:{title:"Normas & Compliance",body:`<div class="lesson"><h3>SOX</h3><p>Controles sobre processos financeiros, segregação de funções, aprovações, acessos privilegiados e evidências.</p></div><div class="lesson"><h3>ISO 27001</h3><p>Sistema de gestão da segurança da informação com foco em riscos, controles, identidade, logging e melhoria contínua.</p></div><div class="lesson"><h3>NIST CSF 2.0</h3><p>Govern, Identify, Protect, Detect, Respond e Recover aplicados à segurança e resiliência do ambiente SAP.</p></div><div class="lesson"><h3>LGPD</h3><p>Governança de dados pessoais, acesso mínimo, rastreabilidade, segurança e responsabilização.</p></div><div class="lesson"><h3>COBIT 2019</h3><p>Governança e gestão de TI com objetivos, práticas, responsabilidades, métricas e alinhamento ao negócio.</p></div><div class="lesson"><h3>CIS Controls v8.1</h3><p>Controles priorizados de cibersegurança, incluindo contas, privilégios, vulnerabilidades, logs e proteção de dados.</p></div><div class="lesson"><h3>PCI DSS 4.0.1</h3><p>Requisitos de segurança para ambientes que armazenam, processam ou transmitem dados de cartão.</p></div><div class="lesson"><h3>ISO 27701</h3><p>Extensão de privacidade para gestão de informações pessoais e responsabilidades de controlador/processador.</p></div><div class="lesson"><h3>ISO 22301</h3><p>Continuidade de negócios, recuperação, análise de impacto e resiliência operacional.</p></div>`}
+};
+function openDetail(k){let d=DETAIL[k]; if(!d)return; let e=document.createElement('div');e.className='modalback';e.id='detailModal';e.innerHTML=`<div class="modal"><button class="close" onclick="closeDetail()">Fechar</button><h2>${d.title}</h2>${d.body}</div>`;document.body.appendChild(e)}
+function closeDetail(){document.getElementById('detailModal')?.remove()}
+function openCourse(name){let c=localDB.courses.find(x=>x.name===name);let e=document.createElement('div');e.className='modalback';e.id='detailModal';e.innerHTML=`<div class="modal"><button class="close" onclick="closeDetail()">Fechar</button><h2>${esc(name)}</h2><p>Progresso atual: <b>${c?.progress||0}%</b></p><div class="lesson"><h3>Aula 1 — Fundamentos</h3><p>Visão geral, arquitetura, riscos e controles.</p></div><div class="lesson"><h3>Aula 2 — Configuração</h3><p>Passo a passo dos principais componentes e parâmetros.</p></div><div class="lesson"><h3>Aula 3 — Laboratório</h3><p>Cenário prático com análise, evidência e remediação.</p></div><button class="btn" onclick="toast('Aula iniciada')">Iniciar aula</button></div>`;document.body.appendChild(e)}
+
+async function fetchDocuments(moduleKey){
+ try{
+  let r=await fetch('/media-api?action=list&module='+encodeURIComponent(moduleKey));
+  let j=await r.json().catch(()=>({items:[]}));
+  if(!r.ok) throw Error(j.error||'Falha ao carregar documentos');
+  return j.items||[];
+ }catch(e){ return []; }
+}
+function fmtBytes(n){n=Number(n||0);if(n<1024)return n+' B';if(n<1048576)return (n/1024).toFixed(1)+' KB';return (n/1048576).toFixed(1)+' MB'}
+async function documentsPanel(moduleKey,moduleLabel){
+ let docs=await fetchDocuments(moduleKey), admin=session?.role!=='GUEST';
+ return `<div class="card" style="margin-top:16px"><div class="docs-head"><div><h3>Documentos PDF — ${esc(moduleLabel)}</h3><p class="muted">Biblioteca de documentos técnicos, guias e materiais deste módulo.</p></div><span class="tag">${docs.length} PDF${docs.length===1?'':'s'}</span></div>
+ <div class="docs-list">${docs.length?docs.map(d=>`<div class="doc-row"><div class="doc-info"><b>📄 ${esc(d.title||d.name)}</b><div class="doc-meta">${esc(d.name)} • ${fmtBytes(d.size)} • ${d.uploadedAt?new Date(d.uploadedAt).toLocaleDateString('pt-BR'):''}</div></div><div class="doc-actions"><button class="btn secondary" onclick="openPdf('${encodeURIComponent(d.key)}')">Abrir PDF</button>${admin?`<button class="btn danger" onclick="deletePdf('${encodeURIComponent(d.key)}','${esc(moduleKey)}')">Excluir</button>`:''}</div></div>`).join(''):'<div class="notice">Nenhum PDF publicado neste módulo ainda.</div>'}</div>
+ ${admin?`<div class="upload-box"><b>Adicionar novo PDF</b><div class="upload-grid"><div><label>Título do documento</label><input id="docTitle_${esc(moduleKey)}" placeholder="Ex.: Guia de SAP ${esc(moduleLabel)}"></div><div><label>Arquivo PDF</label><input id="docFile_${esc(moduleKey)}" type="file" accept="application/pdf,.pdf"></div><button class="btn" onclick="uploadPdf('${esc(moduleKey)}')">Publicar PDF</button></div><div class="mini-note">Somente PDF. Nesta versão, limite recomendado de 4 MB por arquivo.</div></div>`:''}</div>`;
+}
+function openPdf(key){window.open('/media-api?action=download&key='+key,'_blank','noopener')}
+async function uploadPdf(moduleKey){
+ if(session?.role==='GUEST'){showLogin();return}
+ let file=document.getElementById('docFile_'+moduleKey)?.files?.[0], title=document.getElementById('docTitle_'+moduleKey)?.value?.trim();
+ if(!file){toast('Selecione um arquivo PDF');return}
+ if(file.type!=='application/pdf' && !file.name.toLowerCase().endsWith('.pdf')){toast('Envie somente arquivo PDF');return}
+ if(file.size>4*1024*1024){toast('PDF acima de 4 MB. Reduza o arquivo para esta versão.');return}
+ let fd=new FormData();fd.append('module',moduleKey);fd.append('type','pdf'); fd.append('title',title||file.name.replace(/\.pdf$/i,''));fd.append('file',file);
+ try{
+  let r=await fetch('/media-api',{method:'POST',headers:session?.token?{Authorization:'Bearer '+session.token}:{},body:fd});
+  let j=await r.json().catch(()=>({}));if(!r.ok)throw Error(j.error||'Falha no upload');toast('PDF publicado');render();
+ }catch(e){toast(e.message)}
+}
+async function deletePdf(key,moduleKey){
+ if(!confirm('Excluir este PDF?'))return;
+ try{let r=await fetch('/media-api?key='+key,{method:'DELETE',headers:session?.token?{Authorization:'Bearer '+session.token}:{}});let j=await r.json().catch(()=>({}));if(!r.ok)throw Error(j.error||'Falha ao excluir');toast('PDF excluído');render()}catch(e){toast(e.message)}
+}
+
+
+async function mediaLibraryPanel(moduleKey,moduleLabel){
+ let items=[];
+ try{
+  let r=await fetch('/media-api?action=list&module='+encodeURIComponent(moduleKey));
+  let j=await r.json().catch(()=>({items:[]}));
+  if(r.ok) items=j.items||[];
+ }catch(e){}
+ let admin=session?.role!=='GUEST';
+ return `<div class="card" style="margin-top:16px"><div class="docs-head"><div><h3>Biblioteca de Conteúdo — ${esc(moduleLabel)}</h3><p class="muted">Publique PDFs, documentos, vídeos, áudios e materiais. Os arquivos ficam armazenados no projeto.</p></div><span class="tag">${items.length} item${items.length===1?'':'s'}</span></div>
+ <div class="docs-list">${items.length?items.map(d=>`<div class="doc-row"><div class="doc-info"><b>${mediaIcon(d.type)} ${esc(d.title||d.name)}</b><div class="doc-meta">${esc(d.name)} • ${esc(d.type||'arquivo')} • ${fmtBytes(d.size)} • ${d.uploadedAt?new Date(d.uploadedAt).toLocaleDateString('pt-BR'):''}</div></div><div class="doc-actions"><button class="btn secondary" onclick="openMedia('${encodeURIComponent(d.key)}')">Abrir</button>${admin?`<button class="btn danger" onclick="deleteMedia('${encodeURIComponent(d.key)}')">Excluir</button>`:''}</div></div>`).join(''):'<div class="notice">Nenhum material publicado ainda.</div>'}</div>
+ ${admin?`<div class="upload-box"><b>Adicionar novo material</b><div class="upload-grid"><div><label>Título</label><input id="mediaTitle_${esc(moduleKey)}" placeholder="Título do material"></div><div><label>Tipo</label><select id="mediaType_${esc(moduleKey)}"><option value="pdf">PDF</option><option value="documento">Documento</option><option value="video">Vídeo</option><option value="audio">Áudio</option><option value="material">Material</option></select></div><div><label>Escolher arquivo</label><input id="mediaFile_${esc(moduleKey)}" type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.mp3,.wav,.m4a,.mp4,.webm,.mov,application/pdf,audio/*,video/*"></div><button class="btn" onclick="uploadMedia('${esc(moduleKey)}')">Publicar arquivo</button></div><div class="mini-note">O arquivo só aparece como publicado depois que o servidor confirmar o armazenamento.</div></div>`:''}</div>`;
+}
+function mediaIcon(t){return t==='video'?'🎬':t==='audio'?'🎧':t==='pdf'?'📄':'📎'}
+function openMedia(key){window.open('/media-api?action=download&key='+key,'_blank','noopener')}
+async function uploadMedia(moduleKey){
+ if(session?.role==='GUEST'){showLogin();return}
+ let file=document.getElementById('mediaFile_'+moduleKey)?.files?.[0];
+ let title=document.getElementById('mediaTitle_'+moduleKey)?.value?.trim();
+ let type=document.getElementById('mediaType_'+moduleKey)?.value||'material';
+ if(!file){toast('Escolha um arquivo para publicar');return}
+ let fd=new FormData(); fd.append('module',moduleKey); fd.append('type','pdf'); fd.append('title',title||file.name); fd.append('type',type); fd.append('file',file);
+ try{
+  toast('Publicando arquivo...');
+  let r=await fetch('/media-api',{method:'POST',headers:session?.token?{Authorization:'Bearer '+session.token}:{},body:fd});
+  let j=await r.json().catch(()=>({}));
+  if(!r.ok) throw Error(j.error||'Falha ao publicar arquivo');
+  toast('Arquivo publicado com sucesso');
+  render();
+ }catch(e){toast('Erro ao publicar: '+e.message)}
+}
+async function deleteMedia(key){
+ if(!confirm('Excluir este arquivo publicado?'))return;
+ try{
+  let r=await fetch('/media-api?key='+key,{method:'DELETE',headers:session?.token?{Authorization:'Bearer '+session.token}:{}});
+  let j=await r.json().catch(()=>({}));
+  if(!r.ok) throw Error(j.error||'Falha ao excluir');
+  toast('Arquivo excluído'); render();
+ }catch(e){toast('Erro: '+e.message)}
+}
+
+async function governance(){
+ return `<h1>SAP Governança</h1>
+ <div class="card purpose"><h3>Para que serve este módulo?</h3><p>Organiza políticas, responsabilidades, controles, decisões, indicadores e evidências para que Segurança SAP, GRC, BTP, IA, Compliance e Vulnerabilidades trabalhem sob uma mesma visão de governança.</p></div>
+ <div class="grid">
+  <div class="card"><h3>Políticas & Diretrizes</h3><p>Normas internas, princípios de acesso e responsabilidades.</p><button class="btn" onclick="openTopic('govPolicies')">Abrir políticas</button></div>
+  <div class="card"><h3>Riscos & Controles</h3><p>Riscos, controles, owners e planos de ação.</p><button class="btn" onclick="openTopic('govRisks')">Abrir riscos e controles</button></div>
+  <div class="card"><h3>Recertificação</h3><p>Revisão periódica de usuários, roles e exceções.</p><button class="btn" onclick="openTopic('govRecert')">Abrir recertificação</button></div>
+  <div class="card"><h3>Indicadores & KRIs</h3><p>KPIs, KRIs, tendências e visão executiva.</p><button class="btn" onclick="openTopic('govMetrics')">Abrir indicadores</button></div>
+  <div class="card"><h3>Modelo de Responsabilidades</h3><p>Owners, aprovadores, Segurança, Auditoria e negócio.</p><button class="btn" onclick="openTopic('govRaci')">Abrir responsabilidades</button></div>
+  <div class="card"><h3>Exceções & Aceite de Risco</h3><p>Decisão formal, prazo, compensação e acompanhamento.</p><button class="btn" onclick="openTopic('govExceptions')">Abrir exceções</button></div>
+ </div>${await documentsPanel('governance','SAP Governança')}`;
+}
+
+async function users(){let us=await api("/api/users");return `<h1>Usuários / RBAC</h1><div class="card"><table class="table"><tr><th>Nome</th><th>E-mail</th><th>Role</th><th>Status</th></tr>${us.map(u=>`<tr><td>${esc(u.name)}</td><td>${esc(u.email)}</td><td>${esc(u.role)}</td><td>${esc(u.status)}</td></tr>`).join("")}</table></div>`}
+
+async function integrations(){let x=await api("/api/integrations");return `<h1>Integrações</h1><p class="muted">Configuração segura por tenant.</p><div class="grid">${["SAP","GRC","BTP"].map(k=>{let i=x.find(a=>a.kind===k);return `<div class="card"><h3>${k}</h3><p>Status: ${esc(i?.status||"NOT_CONFIGURED")}</p><button class="btn" onclick="testInt('${k.toLowerCase()}')">Testar</button></div>`}).join("")}</div><div class="notice">O banco guarda apenas secret_ref. Credenciais reais devem ficar em Secrets Manager/Vault.</div>`}
+async function testInt(k){try{let r=await api("/api/integrations/"+k+"/test",{method:"POST"});toast(r.message)}catch(e){toast(e.message)}}
+async function audit(){let a=await api("/api/audit");return `<h1>Auditoria</h1><div class="card"><table class="table"><tr><th>Data</th><th>Ação</th><th>Recurso</th><th>Usuário</th></tr>${a.map(x=>`<tr><td>${esc(x.created_at)}</td><td>${esc(x.action)}</td><td>${esc(x.resource_type||"-")}</td><td>${esc(x.user_email||"-")}</td></tr>`).join("")}</table></div>`}
+async function render(){
+ if(!session)session=guest;
+ const appEl=$("app");
+ if(!appEl) return;
+ appEl.innerHTML=shell();
+ const viewEl=$("view");
+ if(!viewEl) return;
+ try{
+  const routes={dashboard,monitoring,security,grc,btp,governance,vulnerabilities,compliance,tickets,academy,articles,contentAdmin,cveAdmin,ai,billing,users,integrations,audit,settings};
+  const page=routes[route()]||dashboard;
+  viewEl.innerHTML=await page();
+ }catch(e){
+  console.error(e);
+  viewEl.innerHTML=`<div class="notice"><b>Não foi possível abrir este módulo.</b><br>${esc(e.message)}</div>`;
+ }
+}
+window.onhashchange=render;render();
+</script></body></html>
